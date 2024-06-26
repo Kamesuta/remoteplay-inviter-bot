@@ -1,4 +1,5 @@
 import { logger } from './log.js';
+import { Request, Response } from 'express';
 
 /**
  * Sleep function
@@ -22,5 +23,18 @@ export function nowait<T extends (...args: never[]) => Promise<unknown>>(
     func(...args).catch((error) => {
       logger.error(error);
     });
+  };
+}
+
+/**
+ * Converts an asynchronous function functor to a functor that returns void for use in Express middleware.
+ * @param fn The asynchronous function functor
+ * @returns An Express middleware function functor
+ */
+export function asyncHandler(
+  fn: (req: Request, res: Response) => Promise<void>,
+) {
+  return (req: Request, res: Response, next: () => void): void => {
+    void fn(req, res).catch(next);
   };
 }
