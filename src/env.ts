@@ -8,6 +8,12 @@ import assert from 'assert';
  */
 export const PORT: number = parseInt(process.env.PORT || '3000');
 
+assert(process.env.DISCORD_TOKEN, 'DISCORD_TOKEN is not set');
+/**
+ * The Discord bot token.
+ */
+export const DISCORD_TOKEN: string = process.env.DISCORD_TOKEN;
+
 assert(process.env.PUBLIC_KEY, 'PUBLIC_KEY is not set');
 /**
  * The public key used for authentication.

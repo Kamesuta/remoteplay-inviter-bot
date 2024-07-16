@@ -1,3 +1,5 @@
+import { DISCORD_TOKEN } from './env.js';
+
 /**
  * Sends a request to the Discord API.
  * @param endpoint - The API endpoint to send the request to.
@@ -14,7 +16,7 @@ export async function discordRequest(
   const res = await fetch(url, {
     headers: {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+      Authorization: `Bot ${DISCORD_TOKEN}`,
       'Content-Type': 'application/json; charset=UTF-8',
       'User-Agent':
         'DiscordBot (https://github.com/discord/discord-example-app, 1.0.0)',
