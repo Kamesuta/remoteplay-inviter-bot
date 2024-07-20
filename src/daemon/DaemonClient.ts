@@ -1,5 +1,6 @@
 import { randomUUID, UUID } from 'crypto';
 import WebSocket from 'ws';
+import { PanelData } from './PanelData.js';
 
 /**
  * A data structure to represent a request to the daemon
@@ -74,25 +75,42 @@ export class DaemonClient {
    * @param message response message
    */
   processResponse(message: string): void {
+    // Parse the message
     const { id, cmd, data } = JSON.parse(message) as DaemonResponseData;
+
+    // Validate the message
+    if (
+      typeof id !== 'string' ||
+      typeof cmd !== 'string' ||
+      data === undefined ||
+      data === null
+    ) {
+      return;
+    }
+
+    // Process the response
     this._processResponse(id, cmd, data);
   }
 
   /**
    * Process a response from the daemon
    * @param requestId request ID
-   * @param type request type
+   * @param cmd request type
    * @param data request data
    */
   private _processResponse(
     requestId: UUID,
-    type: DaemonRequestType,
+    cmd: DaemonRequestType,
     data: object,
   ): void {
+    // Find the request
     const request = this._requests[requestId];
     if (request) {
+      // Consume the request
       delete this._requests[requestId];
-      request.onRequest(type, data);
+
+      // Process the request
+      request.onRequest(cmd, data);
     }
   }
 
@@ -110,18 +128,18 @@ export class DaemonClient {
    * @param user request user
    * @returns panel
    */
-  requestPanel(user: string): Promise<object> {
-    return this._request<object>(DaemonRequestType.generatePanel, user);
+  requestPanel(user: string): Promise<PanelData> {
+    return this._request<PanelData>(DaemonRequestType.generatePanel, user);
   }
 
   /**
    * Send a request to the daemon
-   * @param type request type
+   * @param cmd request type
    * @param user request user
    * @returns response
    */
   private _request<ResponseType>(
-    type: DaemonRequestType,
+    cmd: DaemonRequestType,
     user: string,
   ): Promise<ResponseType> {
     const requestId = randomUUID();
@@ -129,14 +147,14 @@ export class DaemonClient {
     return new Promise((resolve, reject) => {
       // Register the callback
       const request = new TypedDaemonRequest<ResponseType>(
-        type,
+        cmd,
         (data: ResponseType) => resolve(data),
         (error: Error) => reject(error),
       );
       this._requests[requestId] = request;
 
       // Send the message
-      const requestData: DaemonRequestData = { id: requestId, cmd: type, user };
+      const requestData: DaemonRequestData = { id: requestId, cmd, user };
       this._ws.send(JSON.stringify(requestData), (err) => {
         if (err) {
           const error = new Error('Failed to send message', err);

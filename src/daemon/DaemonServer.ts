@@ -106,7 +106,7 @@ export class DaemonServer {
       if (isBinary) return;
       const message = msg.toString();
 
-      const daemonData = this._manager.daemons[daemonId];
+      const daemonData = this._manager.getDaemonFromId(daemonId);
       if (daemonData) {
         // Process the message
         logger.debug(`Received message from ${daemonId}: ${message}`);

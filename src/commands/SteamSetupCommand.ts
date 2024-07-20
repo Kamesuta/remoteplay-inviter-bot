@@ -4,6 +4,7 @@ import {
 } from 'discord.js';
 import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
+import { daemonManager } from '../index.js';
 
 class SteamSetupCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
@@ -25,7 +26,16 @@ class SteamSetupCommand extends SubcommandInteraction {
       await interaction.editReply({
         content: 'クライアントIDが指定されていません',
       });
+      return;
     }
+
+    // クライアントIDを登録
+    daemonManager.bindUser(interaction.user.id, clientId);
+
+    // メッセージを送信
+    await interaction.editReply({
+      content: 'クライアントIDを登録しました',
+    });
   }
 }
 

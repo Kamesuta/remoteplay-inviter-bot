@@ -6,9 +6,9 @@ import { logger } from './utils/log.js';
 import CommandHandler from './commands/CommandHandler.js';
 import { nowait } from './utils/utils.js';
 import commands from './commands/commands.js';
-import { DISCORD_TOKEN } from './env.js';
 import { DaemonServer } from './daemon/DaemonServer.js';
 import { DaemonManager } from './daemon/DaemonManager.js';
+import { DISCORD_TOKEN, PORT } from './env.js';
 
 // -----------------------------------------------------------------------------------------------------------
 // Setup
@@ -69,4 +69,4 @@ client.on(
 await client.login(DISCORD_TOKEN);
 
 // Start the daemon server
-daemonServer.startListen(3000);
+daemonServer.startListen(PORT);

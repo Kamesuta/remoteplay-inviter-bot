@@ -6,10 +6,10 @@ import { DaemonClient } from './DaemonClient.js';
  */
 export class DaemonManager {
   /** User ID to Daemon ID mapping */
-  userToDaemonId: Record<string, string> = {};
+  private _userToDaemonId: Record<string, string> = {};
 
   /** Daemon ID to WebSocket Daemon mapping */
-  daemons: Record<string, DaemonClient> = {};
+  private _daemons: Record<string, DaemonClient> = {};
 
   /**
    * Register a daemon
@@ -17,7 +17,7 @@ export class DaemonManager {
    * @param ws WebSocket connection to the daemon
    */
   registerDaemon(daemonId: string, ws: WebSocket): void {
-    this.daemons[daemonId] = new DaemonClient(ws);
+    this._daemons[daemonId] = new DaemonClient(ws);
   }
 
   /**
@@ -25,6 +25,43 @@ export class DaemonManager {
    * @param daemonId daemon ID
    */
   unregisterDaemon(daemonId: string): void {
-    delete this.daemons[daemonId];
+    delete this._daemons[daemonId];
+  }
+
+  /**
+   * Get a daemon by ID
+   * @param daemonId daemon ID
+   * @returns DaemonClient instance
+   */
+  getDaemonFromId(daemonId: string): DaemonClient | undefined {
+    return this._daemons[daemonId];
+  }
+
+  /**
+   * Bind a user to a daemon
+   * @param userId user ID
+   * @param daemonId daemon ID
+   */
+  bindUser(userId: string, daemonId: string): void {
+    // TODO: use database to store this information
+    this._userToDaemonId[userId] = daemonId;
+  }
+
+  /**
+   * Unbind a user from a daemon
+   * @param userId user ID
+   */
+  unbindUser(userId: string): void {
+    // TODO: use database to store this information
+    delete this._userToDaemonId[userId];
+  }
+
+  /**
+   * Get the daemon ID for a user
+   * @param userId user ID
+   * @returns daemon ID
+   */
+  getDaemonIdFromUser(userId: string): string | undefined {
+    return this._userToDaemonId[userId];
   }
 }

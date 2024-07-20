@@ -5,6 +5,7 @@ import {
   ComponentType,
 } from 'discord.js';
 import { MessageComponentActionInteraction } from './base/action_base.js';
+import { daemonManager } from '../index.js';
 
 class InviteButtonAction extends MessageComponentActionInteraction<ComponentType.Button> {
   /**
@@ -31,10 +32,46 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     interaction: ButtonInteraction,
     params: URLSearchParams,
   ): Promise<void> {
-    const eventId = params.get('event');
-    if (!eventId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
+    const userId = params.get('user');
+    if (!userId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
 
+    // Get the user ID
+    const daemonId = daemonManager.getDaemonIdFromUser(userId);
+    if (!daemonId) {
+      await interaction.reply({
+        ephemeral: true,
+        content:
+          'まずは `/register` コマンドでクライアントIDを登録してください。',
+      });
+      return;
+    }
+
+    // Get the daemon client
+    const daemon = daemonManager.getDaemonFromId(daemonId);
+    if (!daemon) {
+      await interaction.reply({
+        ephemeral: true,
+        content: 'クライアントがオフラインです。',
+      });
+      return;
+    }
+
+    // Defer the reply
     await interaction.deferReply({ ephemeral: true });
+
+    // Request a invite link
+    const link = await daemon.requestLink(userId);
+    if (!link) {
+      await interaction.editReply({
+        content: 'ゲームが起動していません。',
+      });
+      return;
+    }
+
+    // Send the invite
+    await interaction.editReply({
+      content: `招待リンクを作成しました！\n${link}\nリンクを踏んでゲームに参加してください～`,
+    });
   }
 }
 
