@@ -9,7 +9,6 @@ import {
 import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
-import { PanelData } from '../daemon/PanelData.js';
 import InviteButtonAction from './InviteButtonAction.js';
 
 class SteamInviteCommand extends SubcommandInteraction {
@@ -28,7 +27,7 @@ class SteamInviteCommand extends SubcommandInteraction {
       await interaction.reply({
         ephemeral: true,
         content:
-          'まずは `/register` コマンドでクライアントIDを登録してください。',
+          'まずは `/steam setup` コマンドでクライアントIDを登録してください。',
       });
       return;
     }
@@ -47,19 +46,40 @@ class SteamInviteCommand extends SubcommandInteraction {
     await interaction.deferReply({ ephemeral: false });
 
     // Request a panel information
-    const panel = await daemon.requestPanel(interaction.user.id);
-    if (!panel) {
-      await interaction.editReply({
-        content: 'ゲームが起動していません。',
+    const gameId = await daemon
+      .requestGameId(interaction.user.id)
+      .catch(async (error: Error) => {
+        await interaction.editReply({
+          content: `${error.message}`,
+        });
+        return;
       });
-      return;
-    }
+    if (!gameId) return; // TODO: しっかりとエラー処理をする
+
+    // Steamからゲーム情報を取得
+    // Webからゲームの情報を取得
+    const url = `https://store.steampowered.com/api/appdetails?appids=${gameId}&l=japanese`;
+    const response = await fetch(url);
+    const json = (await response.json()) as {
+      [gameId: string]: {
+        success: boolean;
+        data: {
+          name: string;
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          header_image: string;
+        };
+      };
+    };
+    const app = json[`${gameId}`];
+    const name = app?.data?.name;
+    const headerImage = app?.data?.header_image;
+    const storeLink = `https://store.steampowered.com/app/${gameId}?l=japanese`;
+
     if (
-      typeof panel.game !== 'object' ||
-      typeof panel.game.name !== 'string' ||
-      (panel.game.store !== undefined &&
-        typeof panel.game.store !== 'string') ||
-      (panel.game.image !== undefined && typeof panel.game.image !== 'string')
+      !app.success ||
+      typeof name !== 'string' ||
+      typeof headerImage !== 'string' ||
+      typeof storeLink !== 'string'
     ) {
       await interaction.editReply({
         content: 'ゲーム情報が取得できませんでした。',
@@ -68,23 +88,35 @@ class SteamInviteCommand extends SubcommandInteraction {
     }
 
     // Send the invite
-    await this.sendInviteMessage(interaction, panel);
+    await this.sendInviteMessage(
+      interaction,
+      gameId,
+      name,
+      headerImage,
+      storeLink,
+    );
   }
 
   /**
    * Send the invite message
    * @param interaction interaction to reply
-   * @param panel panel data
+   * @param gameId game id
+   * @param name game name
+   * @param headerImage game header image
+   * @param storeLink game store link
    */
   async sendInviteMessage(
     interaction: RepliableInteraction,
-    panel: PanelData,
+    gameId: number,
+    name: string,
+    headerImage: string,
+    storeLink: string,
   ): Promise<void> {
     // Send the invite message
     // Create the embed message
     const embed = new EmbedBuilder()
-      .setTitle(`${panel.game.name} を無料で一緒に遊びましょう！`)
-      .setURL(panel.game.store)
+      .setTitle(`${name} を無料で一緒に遊びましょう！`)
+      .setURL(storeLink)
       .setDescription(
         '参加したい人はあらかじめ以下の参加手順に沿って部屋に入っておいてください。\n' +
           '(順番になったら、こっちで勝手にコントローラーを割り当てます)',
@@ -115,7 +147,7 @@ class SteamInviteCommand extends SubcommandInteraction {
             '4. ページ内の「ゲームに参加」ボタンを押して、Steam Linkアプリを開きます',
         },
       )
-      .setImage(panel.game.image)
+      .setImage(headerImage)
       .setColor(3447003); // DarkBlue
 
     // Send the invite message
@@ -123,7 +155,7 @@ class SteamInviteCommand extends SubcommandInteraction {
       embeds: [embed],
       components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-          InviteButtonAction.create(interaction.user.id),
+          InviteButtonAction.create(interaction.user.id, gameId),
         ),
       ],
     });

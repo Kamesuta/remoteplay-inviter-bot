@@ -11,12 +11,14 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
   /**
    * 招待リンク取得ボタンを作成します
    * @param userId ユーザーID
+   * @param gameId ゲームID
    * @returns 作成したビルダー
    */
-  override create(userId: string): ButtonBuilder {
+  override create(userId: string, gameId: number): ButtonBuilder {
     // カスタムIDを生成
     const customId = this.createCustomId({
       user: `${userId}`,
+      game: `${gameId}`,
     });
 
     // ダイアログを作成
@@ -33,7 +35,8 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     params: URLSearchParams,
   ): Promise<void> {
     const userId = params.get('user');
-    if (!userId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
+    const gameId = params.get('game');
+    if (!userId || !gameId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
 
     // Get the user ID
     const daemonId = daemonManager.getDaemonIdFromUser(userId);
@@ -41,7 +44,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
       await interaction.reply({
         ephemeral: true,
         content:
-          'まずは `/register` コマンドでクライアントIDを登録してください。',
+          'まずは `/steam setup` コマンドでクライアントIDを登録してください。',
       });
       return;
     }
@@ -60,7 +63,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     await interaction.deferReply({ ephemeral: true });
 
     // Request a invite link
-    const link = await daemon.requestLink(userId);
+    const link = await daemon.requestLink(userId, Number(gameId));
     if (!link) {
       await interaction.editReply({
         content: 'ゲームが起動していません。',

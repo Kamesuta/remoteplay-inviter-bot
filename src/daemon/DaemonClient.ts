@@ -1,6 +1,5 @@
 import { randomUUID, UUID } from 'crypto';
 import WebSocket from 'ws';
-import { PanelData } from './PanelData.js';
 
 /**
  * A data structure to represent a request to the daemon
@@ -17,25 +16,29 @@ interface DaemonRequestData {
 interface DaemonResponseData {
   id: UUID;
   cmd: DaemonRequestType;
-  data: object;
+  data: unknown;
 }
 
 /**
  * Request Type
  */
 enum DaemonRequestType {
-  /** Generate a panel request */
-  generatePanel = 'panel',
+  /** Generate a game id */
+  gameId = 'game',
 
   /** Generate a link request */
-  generateLink = 'link',
+  link = 'link',
+
+  /** Error response */
+  error = 'error',
 }
 
 /**
  * Daemon Request
  */
 interface DaemonRequest {
-  onRequest(type: DaemonRequestType, data: object): void;
+  onResolve(type: DaemonRequestType, data: object): void;
+  onReject(error: Error): void;
 }
 
 /**
@@ -48,14 +51,28 @@ class TypedDaemonRequest<T> implements DaemonRequest {
     public reject?: (error: Error) => void,
   ) {}
 
-  onRequest(type: DaemonRequestType, data: object): void {
+  onResolve(type: DaemonRequestType, data: object): void {
     if (type === this.type) {
       this.resolve?.(data as T);
     } else {
       this.reject?.(new Error('Invalid response type'));
     }
   }
+
+  onReject(error: Error): void {
+    this.reject?.(error);
+  }
 }
+
+/**
+ * Error messages
+ */
+const errorMessages: Record<string, string> = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  invalid_cmd: 'Invalid cmd',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  invalid_app: 'Invalid app',
+};
 
 /**
  * Client instance for the Daemon Client
@@ -78,13 +95,17 @@ export class DaemonClient {
     // Parse the message
     const { id, cmd, data } = JSON.parse(message) as DaemonResponseData;
 
+    // Validate id
+    if (typeof id !== 'string') return;
+
+    // Validate if the message is error
+    if (cmd === DaemonRequestType.error) {
+      // Process the error
+      this._processError(id, data);
+    }
+
     // Validate the message
-    if (
-      typeof id !== 'string' ||
-      typeof cmd !== 'string' ||
-      data === undefined ||
-      data === null
-    ) {
+    if (typeof cmd !== 'string' || data === undefined || data === null) {
       return;
     }
 
@@ -110,37 +131,64 @@ export class DaemonClient {
       delete this._requests[requestId];
 
       // Process the request
-      request.onRequest(cmd, data);
+      request.onResolve(cmd, data);
+    }
+  }
+
+  /**
+   * Process an error response from the daemon
+   * @param requestId request ID
+   * @param error error data
+   */
+  private _processError(requestId: UUID, error: unknown): void {
+    // Find the request
+    const request = this._requests[requestId];
+    if (request) {
+      // Consume the request
+      delete this._requests[requestId];
+
+      if (typeof error !== 'string') {
+        request.onReject(new Error('Invalid error response'));
+      } else if (error in errorMessages) {
+        request.onReject(new Error(errorMessages[error]));
+      } else {
+        request.onReject(new Error(`Unknown error: ${error}`));
+      }
     }
   }
 
   /**
    * Request a link to the daemon
    * @param user request user
+   * @param gameId request game id
    * @returns link
    */
-  requestLink(user: string): Promise<string> {
-    return this._request<string>(DaemonRequestType.generateLink, user);
+  requestLink(user: string, gameId: number): Promise<string> {
+    return this._request<string>(DaemonRequestType.link, user, {
+      game: gameId,
+    });
   }
 
   /**
-   * Request a panel to the daemon
+   * Request a game id to the daemon
    * @param user request user
-   * @returns panel
+   * @returns game id
    */
-  requestPanel(user: string): Promise<PanelData> {
-    return this._request<PanelData>(DaemonRequestType.generatePanel, user);
+  requestGameId(user: string): Promise<number> {
+    return this._request<number>(DaemonRequestType.gameId, user);
   }
 
   /**
    * Send a request to the daemon
    * @param cmd request type
    * @param user request user
+   * @param data request data
    * @returns response
    */
   private _request<ResponseType>(
     cmd: DaemonRequestType,
     user: string,
+    data: object = {},
   ): Promise<ResponseType> {
     const requestId = randomUUID();
 
@@ -148,18 +196,21 @@ export class DaemonClient {
       // Register the callback
       const request = new TypedDaemonRequest<ResponseType>(
         cmd,
-        (data: ResponseType) => resolve(data),
-        (error: Error) => reject(error),
+        resolve,
+        reject,
       );
       this._requests[requestId] = request;
 
       // Send the message
-      const requestData: DaemonRequestData = { id: requestId, cmd, user };
+      const requestData: DaemonRequestData = {
+        id: requestId,
+        cmd,
+        user,
+        ...data,
+      };
       this._ws.send(JSON.stringify(requestData), (err) => {
         if (err) {
-          const error = new Error('Failed to send message', err);
-          request.reject?.(error);
-          reject(error);
+          request.onReject(new Error('Failed to send message', err));
         }
       });
     });
