@@ -28,7 +28,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
   }
 
   /** @inheritdoc */
-  async onCommand(
+  override async onCommand(
     interaction: ButtonInteraction,
     params: URLSearchParams,
   ): Promise<void> {

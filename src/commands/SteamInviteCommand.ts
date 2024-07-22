@@ -19,7 +19,9 @@ class SteamInviteCommand extends SubcommandInteraction {
       'Steam Remote Play Together を使用して起動中のゲームに招待します',
     );
 
-  async onCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+  override async onCommand(
+    interaction: ChatInputCommandInteraction,
+  ): Promise<void> {
     // Get the user ID
     const daemonId = daemonManager.getDaemonIdFromUser(interaction.user.id);
     if (!daemonId) {

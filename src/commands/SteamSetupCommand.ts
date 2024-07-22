@@ -17,7 +17,9 @@ class SteamSetupCommand extends SubcommandInteraction {
         .setRequired(true),
     );
 
-  async onCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+  override async onCommand(
+    interaction: ChatInputCommandInteraction,
+  ): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
 
     // クライアントIDを取得
