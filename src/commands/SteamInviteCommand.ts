@@ -47,7 +47,7 @@ class SteamInviteCommand extends SubcommandInteraction {
 
     // Request a panel information
     const gameId = await daemon
-      .requestGameId(interaction.user.id)
+      .requestGameId(interaction.user)
       .catch(async (error: Error) => {
         await interaction.editReply({
           content: `${error.message}`,

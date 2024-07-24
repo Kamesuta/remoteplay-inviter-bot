@@ -63,7 +63,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     await interaction.deferReply({ ephemeral: true });
 
     // Request a invite link
-    const link = await daemon.requestLink(userId, Number(gameId));
+    const link = await daemon.requestLink(interaction.user, Number(gameId));
     if (!link) {
       await interaction.editReply({
         content: 'ゲームが起動していません。',

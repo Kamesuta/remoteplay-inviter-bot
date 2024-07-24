@@ -1,4 +1,5 @@
 import { randomUUID, UUID } from 'crypto';
+import { User } from 'discord.js';
 import WebSocket from 'ws';
 
 /**
@@ -7,7 +8,10 @@ import WebSocket from 'ws';
 interface DaemonRequestData {
   id: UUID;
   cmd: DaemonRequestType;
-  user: string;
+  user: {
+    id: string;
+    name: string;
+  };
 }
 
 /**
@@ -163,7 +167,7 @@ export class DaemonClient {
    * @param gameId request game id
    * @returns link
    */
-  requestLink(user: string, gameId: number): Promise<string> {
+  requestLink(user: User, gameId: number): Promise<string> {
     return this._request<string>(DaemonRequestType.link, user, {
       game: gameId,
     });
@@ -174,7 +178,7 @@ export class DaemonClient {
    * @param user request user
    * @returns game id
    */
-  requestGameId(user: string): Promise<number> {
+  requestGameId(user: User): Promise<number> {
     return this._request<number>(DaemonRequestType.gameId, user);
   }
 
@@ -187,7 +191,7 @@ export class DaemonClient {
    */
   private _request<ResponseType>(
     cmd: DaemonRequestType,
-    user: string,
+    user: User,
     data: object = {},
   ): Promise<ResponseType> {
     const requestId = randomUUID();
@@ -205,7 +209,10 @@ export class DaemonClient {
       const requestData: DaemonRequestData = {
         id: requestId,
         cmd,
-        user,
+        user: {
+          id: user.id,
+          name: user.username,
+        },
         ...data,
       };
       this._ws.send(JSON.stringify(requestData), (err) => {
