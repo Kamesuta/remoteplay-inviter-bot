@@ -1,4 +1,8 @@
-import { ApplicationIntegrationType, SlashCommandBuilder } from 'discord.js';
+import {
+  ApplicationIntegrationType,
+  InteractionContextType,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { CommandGroupInteraction } from './base/command_base.js';
 
 class SteamCommand extends CommandGroupInteraction {
@@ -8,6 +12,11 @@ class SteamCommand extends CommandGroupInteraction {
     .setIntegrationTypes([
       ApplicationIntegrationType.GuildInstall,
       ApplicationIntegrationType.UserInstall,
+    ])
+    .setContexts([
+      InteractionContextType.Guild,
+      InteractionContextType.BotDM,
+      InteractionContextType.PrivateChannel,
     ]);
 }
 
