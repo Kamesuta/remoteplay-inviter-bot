@@ -77,12 +77,13 @@ class TypedDaemonRequest<T> implements DaemonRequest {
 /**
  * Error messages
  */
-const errorMessages: Record<string, string> = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  invalid_cmd: 'Invalid cmd',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  invalid_app: 'Invalid app',
-};
+enum ErrorMessage {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  invalid_message = 'Invalid message',
+  invalid_cmd = 'Invalid cmd',
+  invalid_app = 'Invalid app',
+  /* eslint-enable @typescript-eslint/naming-convention */
+}
 
 /**
  * Client instance for the Daemon Client
@@ -109,24 +110,38 @@ export class DaemonClient {
    */
   processResponse(message: string): void {
     // Parse the message
-    const { id, cmd, data } = JSON.parse(message) as DaemonResponseData;
+    let res: DaemonRequestData;
+    try {
+      res = JSON.parse(message) as DaemonResponseData;
+    } catch (_err) {
+      // Reset the connection and reject all requests
+      this.close('message sent from daemon is not a valid JSON');
+      return;
+    }
 
     // Validate id
-    if (typeof id !== 'string') return;
+    if (typeof res.id !== 'string') return;
 
     // Validate if the message is error
-    if (cmd === DaemonRequestType.error) {
+    if (res.cmd === DaemonRequestType.error) {
       // Process the error
-      this._processError(id, data);
+      this._processError(res.id, res.data);
+      return;
     }
 
     // Validate the message
-    if (typeof cmd !== 'string' || data === undefined || data === null) {
+    if (
+      typeof res.cmd !== 'string' ||
+      res.data === undefined ||
+      res.data === null
+    ) {
+      // Process the error
+      this._processError(res.id, ErrorMessage.invalid_message);
       return;
     }
 
     // Process the response
-    this._processResponse(id, cmd, data);
+    this._processResponse(res.id, res.cmd, res.data);
   }
 
   /**
@@ -165,11 +180,26 @@ export class DaemonClient {
 
       if (typeof error !== 'string') {
         request.onReject(new Error('Invalid error response'));
-      } else if (error in errorMessages) {
-        request.onReject(new Error(errorMessages[error]));
+      } else if (error in ErrorMessage) {
+        request.onReject(
+          new Error(ErrorMessage[error as keyof typeof ErrorMessage]),
+        );
       } else {
         request.onReject(new Error(`Unknown error: ${error}`));
       }
+    }
+  }
+
+  /**
+   * Close the connection to the daemon and reject all requests
+   * @param reason close reason
+   */
+  close(reason?: string): void {
+    this._ws.close();
+
+    // Reject all requests
+    for (const [_requestId, request] of Object.entries(this._requests)) {
+      request.onReject(new Error(reason ?? 'Connection closed'));
     }
   }
 

@@ -31,8 +31,21 @@ class SteamSetupCommand extends SubcommandInteraction {
       return;
     }
 
+    // Send bind message if the daemon is connected
+    const daemon = daemonManager.getDaemonFromId(clientId);
+    if (!daemon) {
+      await interaction.editReply({
+        content:
+          'そのクライアントIDはオンラインではありません。クライアントを起動してから再度お試しください。',
+      });
+      return;
+    }
+
     // クライアントIDを登録
     await daemonManager.bindUser(interaction.user, clientId);
+
+    // デーモンにバインドメッセージを送信
+    daemon.sendBindMessage(interaction.user.username);
 
     // メッセージを送信
     await interaction.editReply({

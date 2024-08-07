@@ -67,12 +67,6 @@ export class DaemonManager {
         daemonVersion: this.getDaemonFromId(daemonId)?.version ?? null,
       },
     });
-
-    // Send bind message if the daemon is connected
-    const daemon = this.getDaemonFromId(daemonId);
-    if (daemon) {
-      daemon.sendBindMessage(user.username);
-    }
   }
 
   /**
