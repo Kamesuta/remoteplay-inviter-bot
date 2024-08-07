@@ -22,7 +22,9 @@ class SteamInviteCommand extends SubcommandInteraction {
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     // Get the user ID
-    const daemonId = daemonManager.getDaemonIdFromUser(interaction.user.id);
+    const daemonId = await daemonManager.getDaemonIdFromUser(
+      interaction.user.id,
+    );
     if (!daemonId) {
       await interaction.reply({
         ephemeral: true,

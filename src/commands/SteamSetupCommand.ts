@@ -32,7 +32,7 @@ class SteamSetupCommand extends SubcommandInteraction {
     }
 
     // クライアントIDを登録
-    daemonManager.bindUser(interaction.user.id, clientId);
+    await daemonManager.bindUser(interaction.user, clientId);
 
     // メッセージを送信
     await interaction.editReply({

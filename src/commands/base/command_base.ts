@@ -2,7 +2,6 @@ import {
   ApplicationCommandDataResolvable,
   ChatInputCommandInteraction,
   Interaction,
-  SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,

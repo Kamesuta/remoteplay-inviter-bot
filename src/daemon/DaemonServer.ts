@@ -1,4 +1,3 @@
-// 必要なパッケージをインポートする
 import express, { Request, Response } from 'express';
 import WebSocket from 'ws';
 import { resolve } from 'path';
@@ -8,6 +7,8 @@ import { Socket } from 'net';
 import { logger } from '../utils/log.js';
 import { DaemonManager } from './DaemonManager.js';
 import semver from 'semver';
+import { nowait } from '../utils/utils.js';
+import { prisma } from '../index.js';
 
 /** Required version */
 const requiredVersion = '0.1.0';
@@ -103,13 +104,42 @@ export class DaemonServer {
     }
 
     // Upgrade the connection to WebSocket
-    this.wss.handleUpgrade(request, socket, head, (ws) => {
-      // Add daemon id to daemon object
-      this._manager.registerDaemon(daemonId, ws);
+    this.wss.handleUpgrade(
+      request,
+      socket,
+      head,
+      nowait(async (ws: WebSocket) => {
+        // Add daemon id to daemon object
+        const daemonData = this._manager.registerDaemon(
+          daemonId,
+          daemonVersion,
+          ws,
+        );
 
-      // Handle WebSocket connection
-      this.wss.emit('connection', ws, request);
-    });
+        // Handle WebSocket connection
+        this.wss.emit('connection', ws, request);
+
+        // Save version to database for analytics
+        const userData = await prisma.userData.findUnique({
+          where: {
+            daemonId,
+          },
+        });
+        if (userData) {
+          await prisma.userData.update({
+            where: {
+              id: userData.id,
+            },
+            data: {
+              daemonVersion,
+            },
+          });
+        }
+
+        // Send welcome message
+        daemonData.sendWelcomeMessage(userData?.name ?? undefined);
+      }),
+    );
   }
 
   /**

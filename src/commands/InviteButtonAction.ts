@@ -39,7 +39,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     if (!userId || !gameId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
 
     // Get the user ID
-    const daemonId = daemonManager.getDaemonIdFromUser(userId);
+    const daemonId = await daemonManager.getDaemonIdFromUser(userId);
     if (!daemonId) {
       await interaction.reply({
         ephemeral: true,

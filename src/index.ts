@@ -9,6 +9,7 @@ import commands from './commands/commands.js';
 import { DaemonServer } from './daemon/DaemonServer.js';
 import { DaemonManager } from './daemon/DaemonManager.js';
 import { DISCORD_TOKEN, PORT } from './env.js';
+import { PrismaClient } from '@prisma/client';
 
 // -----------------------------------------------------------------------------------------------------------
 // Setup
@@ -17,7 +18,7 @@ import { DISCORD_TOKEN, PORT } from './env.js';
 /**
  * データベースのインスタンス
  */
-// export const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 /**
  * Daemon Manager

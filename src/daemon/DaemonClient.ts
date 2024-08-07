@@ -8,10 +8,13 @@ import WebSocket from 'ws';
 interface DaemonRequestData {
   id: UUID;
   cmd: DaemonRequestType;
-  user: {
+  // message type: undefined, others: object
+  user?: {
     id: string;
     name: string;
   };
+  // message type: string, others: undefined
+  data?: unknown;
 }
 
 /**
@@ -27,6 +30,9 @@ interface DaemonResponseData {
  * Request Type
  */
 enum DaemonRequestType {
+  /** Announce message */
+  message = 'message',
+
   /** Generate a game id */
   gameId = 'game',
 
@@ -87,9 +93,15 @@ export class DaemonClient {
 
   /**
    * Constructor
+   * @param uuid daemon UUID
+   * @param version daemon version
    * @param _ws WebSocket connection
    */
-  constructor(private _ws: WebSocket) {}
+  constructor(
+    public uuid: string,
+    public version: string,
+    private _ws: WebSocket,
+  ) {}
 
   /**
    * Process a response from the daemon
@@ -221,5 +233,43 @@ export class DaemonClient {
         }
       });
     });
+  }
+
+  /**
+   * Send a welcome message to the daemon
+   * @param bindUsername bind username
+   */
+  sendWelcomeMessage(bindUsername?: string): void {
+    const message = bindUsername
+      ? `Welcome, ${bindUsername}!\nType \`/steam invite\` to invite a friend.`
+      : `Type \`/steam setup ${this.uuid}\` to link your Discord account.`;
+
+    this._sendMessage(message);
+  }
+
+  /**
+   * Send a bind message to the daemon
+   * @param bindUsername bind username
+   */
+  sendBindMessage(bindUsername: string): void {
+    const message = `You are now linked to ${bindUsername}!\nType \`/steam invite\` to invite a friend.`;
+
+    this._sendMessage(message);
+  }
+
+  /**
+   * Send a message to the daemon
+   * @param message message
+   */
+  private _sendMessage(message: string): void {
+    const requestId = randomUUID();
+
+    const requestData: DaemonRequestData = {
+      id: requestId,
+      cmd: DaemonRequestType.message,
+      data: message,
+    };
+
+    this._ws.send(JSON.stringify(requestData));
   }
 }
