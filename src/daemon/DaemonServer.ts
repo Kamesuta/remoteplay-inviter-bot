@@ -7,6 +7,10 @@ import { parse } from 'url';
 import { Socket } from 'net';
 import { logger } from '../utils/log.js';
 import { DaemonManager } from './DaemonManager.js';
+import semver from 'semver';
+
+/** Required version */
+const requiredVersion = '0.1.0';
 
 /**
  * Represents a daemon server that handles WebSocket connections and HTTP requests.
@@ -69,11 +73,31 @@ export class DaemonServer {
    * @param head buffer
    */
   private _upgrade(request: Request, socket: Socket, head: Buffer): void {
-    const { query } = parse(request.url, true);
-    const daemonId = query.token;
+    const {
+      query: { token: daemonId, v: daemonVersion },
+    } = parse(request.url, true);
 
     if (!daemonId || typeof daemonId !== 'string') {
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    if (
+      !daemonVersion ||
+      typeof daemonVersion !== 'string' ||
+      !semver.valid(daemonVersion)
+    ) {
+      socket.write('HTTP/1.1 400 Bad Request\r\n\r\nInvalid version');
+      socket.destroy();
+      return;
+    }
+    if (!semver.gte(daemonVersion, requiredVersion)) {
+      const versionJson = JSON.stringify({
+        required: requiredVersion,
+        download: 'https://example.com',
+      });
+      socket.write(`HTTP/1.1 426 Upgrade Required\r\n\r\n${versionJson}`);
       socket.destroy();
       return;
     }
