@@ -15,6 +15,8 @@ interface DaemonRequestData {
   };
   // message type: string, others: undefined
   data?: unknown;
+  game?: number;
+  copy?: string;
 }
 
 /**
@@ -274,7 +276,12 @@ export class DaemonClient {
       ? `Welcome, ${bindUsername}!\nType \`/steam invite\` to invite a friend.`
       : `Type \`/steam setup ${this.uuid}\` to link your Discord account.`;
 
-    this._sendMessage(message);
+    // Send the message
+    // (if bindUsername is not provided, send setup command and copy the command to the clipboard)
+    this._sendMessage(
+      message,
+      bindUsername ? undefined : `/steam setup client_id:${this.uuid}`,
+    );
   }
 
   /**
@@ -290,14 +297,16 @@ export class DaemonClient {
   /**
    * Send a message to the daemon
    * @param message message
+   * @param copy message to copy to the clipboard
    */
-  private _sendMessage(message: string): void {
+  private _sendMessage(message: string, copy?: string): void {
     const requestId = randomUUID();
 
     const requestData: DaemonRequestData = {
       id: requestId,
       cmd: DaemonRequestType.message,
       data: message,
+      copy,
     };
 
     this._ws.send(JSON.stringify(requestData));
