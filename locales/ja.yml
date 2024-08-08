@@ -1,0 +1,5 @@
+invite_command:
+  description: Steam Remote Play Together を使用して起動中のゲームに招待します。
+  daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
+  daemon_offline: クライアントがオフラインです。
+  game_info_failed: ゲーム情報が取得できませんでした。

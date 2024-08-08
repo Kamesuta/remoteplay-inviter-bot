@@ -1,0 +1,5 @@
+invite_command:
+  description: Invites to games currently running using Steam Remote Play Together.
+  daemon_not_linked: Please register your client ID first with the `/steam setup` command.
+  daemon_offline: The client is offline.
+  game_info_failed: Failed to retrieve game information.

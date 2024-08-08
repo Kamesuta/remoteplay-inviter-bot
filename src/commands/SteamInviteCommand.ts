@@ -10,13 +10,13 @@ import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
 import InviteButtonAction from './InviteButtonAction.js';
+import { forDiscord, i18n } from '../utils/i18n.js';
 
 class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
     .setName('invite')
-    .setDescription(
-      'Steam Remote Play Together を使用して起動中のゲームに招待します',
-    );
+    .setDescription(i18n.__('invite_command.description'))
+    .setDescriptionLocalizations(forDiscord('invite_command.description'));
 
   override async onCommand(
     interaction: ChatInputCommandInteraction,
@@ -28,8 +28,10 @@ class SteamInviteCommand extends SubcommandInteraction {
     if (!daemonId) {
       await interaction.reply({
         ephemeral: true,
-        content:
-          'まずは `/steam setup` コマンドでクライアントIDを登録してください。',
+        content: i18n.__({
+          phrase: 'invite_command.daemon_not_linked',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
@@ -39,7 +41,10 @@ class SteamInviteCommand extends SubcommandInteraction {
     if (!daemon) {
       await interaction.reply({
         ephemeral: true,
-        content: 'クライアントがオフラインです。',
+        content: i18n.__({
+          phrase: 'invite_command.daemon_offline',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
@@ -56,10 +61,10 @@ class SteamInviteCommand extends SubcommandInteraction {
         });
         return;
       });
-    if (!gameId) return; // TODO: しっかりとエラー処理をする
+    if (!gameId) return;
 
-    // Steamからゲーム情報を取得
-    // Webからゲームの情報を取得
+    // Fetch game information from Steam
+    // Fetch game information from the web
     const url = `https://store.steampowered.com/api/appdetails?appids=${gameId}&l=japanese`;
     const response = await fetch(url);
     const json = (await response.json()) as {
@@ -84,7 +89,10 @@ class SteamInviteCommand extends SubcommandInteraction {
       typeof storeLink !== 'string'
     ) {
       await interaction.editReply({
-        content: 'ゲーム情報が取得できませんでした。',
+        content: i18n.__({
+          phrase: 'game_info_failed',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
