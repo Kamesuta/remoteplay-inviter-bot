@@ -1,4 +1,3 @@
-// 必要なパッケージをインポートする
 import { Client, Events } from 'discord.js';
 import 'dotenv/config';
 
@@ -16,7 +15,7 @@ import { PrismaClient } from '@prisma/client';
 // -----------------------------------------------------------------------------------------------------------
 
 /**
- * データベースのインスタンス
+ * Database Client
  */
 export const prisma = new PrismaClient();
 
@@ -34,7 +33,7 @@ export const daemonServer = new DaemonServer(daemonManager);
  * Discord Client
  */
 export const client: Client = new Client({
-  // Botで使うGetwayIntents、partials
+  // Gateway Intents and Partials used by the bot
   intents: [],
 });
 
@@ -49,12 +48,12 @@ const commandHandler = new CommandHandler(commands);
 client.on(
   Events.ClientReady,
   nowait(async () => {
-    logger.info(`${client.user?.username ?? 'Unknown'} として起動しました!`);
+    logger.info(`Started as ${client.user?.username ?? 'Unknown'}!`);
 
-    // イベント管理者用のコマンドを登録
+    // Register commands for event handlers
     await commandHandler.registerCommands();
 
-    logger.info(`インタラクションの登録が完了しました`);
+    logger.info(`Interaction registration completed`);
   }),
 );
 client.on(
@@ -66,7 +65,7 @@ client.on(
 // Start the bot
 // -----------------------------------------------------------------------------------------------------------
 
-// Discordにログインする
+// Log in to Discord
 await client.login(DISCORD_TOKEN);
 
 // Start the daemon server

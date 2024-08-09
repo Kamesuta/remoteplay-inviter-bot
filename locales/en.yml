@@ -3,3 +3,10 @@ invite_command:
   daemon_not_linked: Please register your client ID first with the `/steam setup` command.
   daemon_offline: The client is offline.
   game_info_failed: Failed to retrieve game information.
+
+invite_panel:
+  steam_language: english
+  title: "Let's play {{name}} together for free!"
+  description: |-
+    If you want to join, please enter the room following the steps below.
+    (Once it's your turn, I'll automatically assign a controller for you)

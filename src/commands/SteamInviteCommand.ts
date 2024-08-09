@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ChatInputCommandInteraction,
   EmbedBuilder,
+  GuildMember,
   RepliableInteraction,
   SlashCommandSubcommandBuilder,
 } from 'discord.js';
@@ -10,7 +11,7 @@ import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
 import InviteButtonAction from './InviteButtonAction.js';
-import { forDiscord, i18n } from '../utils/i18n.js';
+import { forDiscord, fromDiscordLocale, i18n } from '../utils/i18n.js';
 
 class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
@@ -30,7 +31,7 @@ class SteamInviteCommand extends SubcommandInteraction {
         ephemeral: true,
         content: i18n.__({
           phrase: 'invite_command.daemon_not_linked',
-          locale: interaction.locale,
+          locale: fromDiscordLocale(interaction.locale),
         }),
       });
       return;
@@ -43,7 +44,7 @@ class SteamInviteCommand extends SubcommandInteraction {
         ephemeral: true,
         content: i18n.__({
           phrase: 'invite_command.daemon_offline',
-          locale: interaction.locale,
+          locale: fromDiscordLocale(interaction.locale),
         }),
       });
       return;
@@ -63,9 +64,15 @@ class SteamInviteCommand extends SubcommandInteraction {
       });
     if (!gameId) return;
 
+    // Steam Language Key
+    const steamLanguage = i18n.__({
+      phrase: 'invite_panel.steam_language',
+      locale: fromDiscordLocale(interaction.locale),
+    });
+
     // Fetch game information from Steam
     // Fetch game information from the web
-    const url = `https://store.steampowered.com/api/appdetails?appids=${gameId}&l=japanese`;
+    const url = `https://store.steampowered.com/api/appdetails?appids=${gameId}&l=${steamLanguage}`;
     const response = await fetch(url);
     const json = (await response.json()) as {
       [gameId: string]: {
@@ -80,7 +87,7 @@ class SteamInviteCommand extends SubcommandInteraction {
     const app = json[`${gameId}`];
     const name = app?.data?.name;
     const headerImage = app?.data?.header_image;
-    const storeLink = `https://store.steampowered.com/app/${gameId}?l=japanese`;
+    const storeLink = `https://store.steampowered.com/app/${gameId}?l=${steamLanguage}`;
 
     if (
       !app.success ||
@@ -91,7 +98,7 @@ class SteamInviteCommand extends SubcommandInteraction {
       await interaction.editReply({
         content: i18n.__({
           phrase: 'game_info_failed',
-          locale: interaction.locale,
+          locale: fromDiscordLocale(interaction.locale),
         }),
       });
       return;
@@ -122,14 +129,39 @@ class SteamInviteCommand extends SubcommandInteraction {
     headerImage: string,
     storeLink: string,
   ): Promise<void> {
+    // Get display name
+    const member =
+      interaction.member instanceof GuildMember
+        ? interaction.member
+        : undefined;
+    const displayName = member?.displayName ?? interaction.user.displayName;
+    const avatarURL =
+      member?.user.displayAvatarURL() ?? interaction.user.displayAvatarURL();
+
     // Send the invite message
     // Create the embed message
     const embed = new EmbedBuilder()
-      .setTitle(`${name} を無料で一緒に遊びましょう！`)
+      .setAuthor({
+        name: displayName,
+        iconURL: avatarURL,
+      })
+      .setTitle(
+        i18n.__(
+          {
+            phrase: 'invite_panel.title',
+            locale: fromDiscordLocale(interaction.locale),
+          },
+          {
+            name,
+          },
+        ),
+      )
       .setURL(storeLink)
       .setDescription(
-        '参加したい人はあらかじめ以下の参加手順に沿って部屋に入っておいてください。\n' +
-          '(順番になったら、こっちで勝手にコントローラーを割り当てます)',
+        i18n.__({
+          phrase: 'invite_panel.description',
+          locale: fromDiscordLocale(interaction.locale),
+        }),
       )
       .addFields(
         {

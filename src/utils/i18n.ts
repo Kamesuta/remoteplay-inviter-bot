@@ -13,6 +13,7 @@ export const i18n = new I18n({
   directory: path.join(getBasedirPath('locales')),
   objectNotation: true,
   parser: yaml,
+  updateFiles: false,
   extension: '.yml',
 });
 
@@ -24,4 +25,18 @@ export const i18n = new I18n({
 export function forDiscord(phrase: string): LocalizationMap {
   const hashedList: HashedList[] = i18n.__h(phrase);
   return pick(Object.assign({}, ...hashedList), Object.values(Locale));
+}
+
+/**
+ * Convert Discord locale to i18n locale
+ * @param locale Discord locale
+ * @returns i18n locale
+ */
+export function fromDiscordLocale(locale: Locale): string {
+  switch (locale) {
+    case Locale.Japanese:
+      return 'ja';
+    default:
+      return 'en';
+  }
 }

@@ -3,3 +3,10 @@ invite_command:
   daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
   daemon_offline: クライアントがオフラインです。
   game_info_failed: ゲーム情報が取得できませんでした。
+
+invite_panel:
+  steam_language: japanese
+  title: '{{name}} を無料で一緒に遊びましょう！'
+  description: |-
+    参加したい人はあらかじめ以下の参加手順に沿って部屋に入っておいてください。
+    (順番になったら、こっちで勝手にコントローラーを割り当てます)
