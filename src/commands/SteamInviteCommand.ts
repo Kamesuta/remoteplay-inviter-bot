@@ -11,7 +11,7 @@ import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
 import InviteButtonAction from './InviteButtonAction.js';
-import { forDiscord, fromDiscordLocale, i18n } from '../utils/i18n.js';
+import { forDiscord, i18n } from '../utils/i18n.js';
 
 class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
@@ -30,8 +30,8 @@ class SteamInviteCommand extends SubcommandInteraction {
       await interaction.reply({
         ephemeral: true,
         content: i18n.__({
-          phrase: 'invite_command.daemon_not_linked',
-          locale: fromDiscordLocale(interaction.locale),
+          phrase: 'invite_command.error.daemon_not_linked',
+          locale: interaction.locale,
         }),
       });
       return;
@@ -43,8 +43,8 @@ class SteamInviteCommand extends SubcommandInteraction {
       await interaction.reply({
         ephemeral: true,
         content: i18n.__({
-          phrase: 'invite_command.daemon_offline',
-          locale: fromDiscordLocale(interaction.locale),
+          phrase: 'invite_command.error.daemon_offline',
+          locale: interaction.locale,
         }),
       });
       return;
@@ -67,7 +67,7 @@ class SteamInviteCommand extends SubcommandInteraction {
     // Steam Language Key
     const steamLanguage = i18n.__({
       phrase: 'invite_panel.steam_language',
-      locale: fromDiscordLocale(interaction.locale),
+      locale: interaction.locale,
     });
 
     // Fetch game information from Steam
@@ -97,8 +97,8 @@ class SteamInviteCommand extends SubcommandInteraction {
     ) {
       await interaction.editReply({
         content: i18n.__({
-          phrase: 'game_info_failed',
-          locale: fromDiscordLocale(interaction.locale),
+          phrase: 'invite_command.error.game_info_failed',
+          locale: interaction.locale,
         }),
       });
       return;
@@ -149,27 +149,28 @@ class SteamInviteCommand extends SubcommandInteraction {
         i18n.__(
           {
             phrase: 'invite_panel.title',
-            locale: fromDiscordLocale(interaction.locale),
+            locale: interaction.locale,
           },
-          {
-            name,
-          },
+          { name },
         ),
       )
       .setURL(storeLink)
       .setDescription(
         i18n.__({
           phrase: 'invite_panel.description',
-          locale: fromDiscordLocale(interaction.locale),
+          locale: interaction.locale,
         }),
       )
       .addFields(
         {
-          name: '特徴',
-          value:
-            '- ゲームを**持っていなくても**無料で参加できます\n' +
-            '- PCだけでなく、**スマホでも**参加できます！\n' +
-            '- Steamアカウントはなくてもプレイできます',
+          name: i18n.__({
+            phrase: 'invite_panel.features.name',
+            locale: interaction.locale,
+          }),
+          value: i18n.__({
+            phrase: 'invite_panel.features.value',
+            locale: interaction.locale,
+          }),
         },
         {
           name: '参加手順 (スマホの場合)',
@@ -197,7 +198,11 @@ class SteamInviteCommand extends SubcommandInteraction {
       embeds: [embed],
       components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
-          InviteButtonAction.create(interaction.user.id, gameId),
+          InviteButtonAction.create(
+            interaction.user.id,
+            gameId,
+            interaction.locale,
+          ),
         ),
       ],
     });

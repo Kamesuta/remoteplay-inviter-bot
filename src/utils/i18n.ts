@@ -10,6 +10,14 @@ import { getBasedirPath } from './basedir.js';
  */
 export const i18n = new I18n({
   locales: ['en', 'ja'],
+  fallbacks: {
+    // Fall back to 'en' for all other locales
+    ...Object.values(Locale)
+      .map((locale) => ({ [locale]: 'en' }))
+      .reduce((a, b) => ({ ...a, ...b })),
+    // Special
+    [Locale.Japanese]: 'ja',
+  },
   directory: path.join(getBasedirPath('locales')),
   objectNotation: true,
   parser: yaml,
@@ -25,18 +33,4 @@ export const i18n = new I18n({
 export function forDiscord(phrase: string): LocalizationMap {
   const hashedList: HashedList[] = i18n.__h(phrase);
   return pick(Object.assign({}, ...hashedList), Object.values(Locale));
-}
-
-/**
- * Convert Discord locale to i18n locale
- * @param locale Discord locale
- * @returns i18n locale
- */
-export function fromDiscordLocale(locale: Locale): string {
-  switch (locale) {
-    case Locale.Japanese:
-      return 'ja';
-    default:
-      return 'en';
-  }
 }

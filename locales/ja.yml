@@ -1,8 +1,9 @@
 invite_command:
   description: Steam Remote Play Together を使用して起動中のゲームに招待します。
-  daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
-  daemon_offline: クライアントがオフラインです。
-  game_info_failed: ゲーム情報が取得できませんでした。
+  error:
+    daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
+    daemon_offline: クライアントがオフラインです。
+    game_info_failed: ゲーム情報が取得できませんでした。
 
 invite_panel:
   steam_language: japanese
@@ -10,3 +11,20 @@ invite_panel:
   description: |-
     参加したい人はあらかじめ以下の参加手順に沿って部屋に入っておいてください。
     (順番になったら、こっちで勝手にコントローラーを割り当てます)
+  features:
+    name: 特徴
+    value: |-
+      - ゲームを**持っていなくても**無料で参加できます
+      - PCだけでなく、**スマホでも**参加できます！
+      - Steamアカウントはなくてもプレイできます
+
+invite_button:
+  label: 今すぐゲームに参加する！
+  error:
+    daemon_not_linked: 招待主がクライアントIDを登録していません。
+    daemon_offline: 招待主がオフラインです。
+    request_failed: 招待リクエストが失敗しました。招待主がゲームを起動していない可能性があります。
+  invite_message: |-
+    招待リンクを作成しました！
+    {{{link}}}
+    リンクを踏んでゲームに参加してください～

@@ -6,25 +6,36 @@ import {
 } from 'discord.js';
 import { MessageComponentActionInteraction } from './base/action_base.js';
 import { daemonManager } from '../index.js';
+import { i18n } from '../utils/i18n.js';
 
 class InviteButtonAction extends MessageComponentActionInteraction<ComponentType.Button> {
   /**
-   * 招待リンク取得ボタンを作成します
-   * @param userId ユーザーID
-   * @param gameId ゲームID
-   * @returns 作成したビルダー
+   * Creates an invite link button
+   * @param userId User ID
+   * @param gameId Game ID
+   * @param locale Locale
+   * @returns The created builder
    */
-  override create(userId: string, gameId: number): ButtonBuilder {
-    // カスタムIDを生成
+  override create(
+    userId: string,
+    gameId: number,
+    locale: string,
+  ): ButtonBuilder {
+    // Generate custom ID
     const customId = this.createCustomId({
       user: `${userId}`,
       game: `${gameId}`,
     });
 
-    // ダイアログを作成
+    // Create the button
     return new ButtonBuilder()
       .setCustomId(customId)
-      .setLabel('招待リンク取得')
+      .setLabel(
+        i18n.__({
+          phrase: 'invite_button.label',
+          locale,
+        }),
+      )
       .setStyle(ButtonStyle.Success)
       .setEmoji('🔗');
   }
@@ -36,15 +47,17 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
   ): Promise<void> {
     const userId = params.get('user');
     const gameId = params.get('game');
-    if (!userId || !gameId) return; // 必要なパラメータがない場合は旧形式の可能性があるため無視
+    if (!userId || !gameId) return;
 
     // Get the user ID
     const daemonId = await daemonManager.getDaemonIdFromUser(userId);
     if (!daemonId) {
       await interaction.reply({
         ephemeral: true,
-        content:
-          'まずは `/steam setup` コマンドでクライアントIDを登録してください。',
+        content: i18n.__({
+          phrase: 'invite_button.error.daemon_not_linked',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
@@ -54,7 +67,10 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     if (!daemon) {
       await interaction.reply({
         ephemeral: true,
-        content: 'クライアントがオフラインです。',
+        content: i18n.__({
+          phrase: 'invite_button.error.daemon_offline',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
@@ -63,17 +79,25 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     await interaction.deferReply({ ephemeral: true });
 
     // Request a invite link
-    const link = await daemon.requestLink(interaction.user, Number(gameId));
-    if (!link) {
-      await interaction.editReply({
-        content: 'ゲームが起動していません。',
+    const link = await daemon
+      .requestLink(interaction.user, Number(gameId))
+      .catch(async (error: Error) => {
+        await interaction.editReply({
+          content: `${error.message}`,
+        });
+        return;
       });
-      return;
-    }
+    if (!link) return;
 
     // Send the invite
     await interaction.editReply({
-      content: `招待リンクを作成しました！\n${link}\nリンクを踏んでゲームに参加してください～`,
+      content: i18n.__(
+        {
+          phrase: 'invite_button.invite_message',
+          locale: interaction.locale,
+        },
+        { link },
+      ),
     });
   }
 }
