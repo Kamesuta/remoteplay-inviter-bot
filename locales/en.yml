@@ -29,6 +29,15 @@ invite_button:
     {{{link}}}
     Click the link to join the game
 
+daemon:
+  welcome_message: |-
+    Welcome, {{username}}!
+    Type \`/steam invite\` to invite a friend.
+  link_message: Type \`/steam setup {{client_id}}\` to link your Discord account.
+  bind_message: |-
+    You are now linked to {{username}}!
+    Type \`/steam invite\` to invite a friend.
+
 error:
   invalid_response_type: Unexpected response type received from the host client.
   invalid_response_message: Unexpected response message received from the host client.

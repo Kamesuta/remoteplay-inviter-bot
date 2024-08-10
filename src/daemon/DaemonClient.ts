@@ -9,6 +9,7 @@ import {
   SendRequestError,
   TranslatableError,
 } from '../utils/error.js';
+import { i18n } from '../utils/i18n.js';
 
 /**
  * A data structure to represent a request to the daemon
@@ -272,28 +273,47 @@ export class DaemonClient {
 
   /**
    * Send a welcome message to the daemon
-   * @param bindUsername bind username
+   * @param locale locale
+   * @param username bind username
    */
-  sendWelcomeMessage(bindUsername?: string): void {
-    const message = bindUsername
-      ? `Welcome, ${bindUsername}!\nType \`/steam invite\` to invite a friend.`
-      : `Type \`/steam setup ${this.uuid}\` to link your Discord account.`;
+  sendWelcomeMessage(locale: string, username: string): void {
+    const message = i18n.__(
+      { phrase: 'daemon.welcome_message', locale },
+      { username },
+    );
 
     // Send the message
-    // (if bindUsername is not provided, send setup command and copy the command to the clipboard)
-    this._sendMessage(
-      message,
-      bindUsername ? undefined : `/steam setup client_id:${this.uuid}`,
+    this._sendMessage(message);
+  }
+
+  /**
+   * Send a link message to the daemon
+   * @param locale locale
+   */
+  sendLinkMessage(locale = 'en'): void {
+    const message = i18n.__(
+      { phrase: 'daemon.link_message', locale },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      { client_id: this.uuid },
     );
+
+    // Send the message
+    // (and copy the command to the clipboard)
+    this._sendMessage(message, `/steam setup client_id:${this.uuid}`);
   }
 
   /**
    * Send a bind message to the daemon
-   * @param bindUsername bind username
+   * @param locale locale
+   * @param username bind username
    */
-  sendBindMessage(bindUsername: string): void {
-    const message = `You are now linked to ${bindUsername}!\nType \`/steam invite\` to invite a friend.`;
+  sendBindMessage(locale: string, username: string): void {
+    const message = i18n.__(
+      { phrase: 'daemon.bind_message', locale },
+      { username },
+    );
 
+    // Send the message
     this._sendMessage(message);
   }
 

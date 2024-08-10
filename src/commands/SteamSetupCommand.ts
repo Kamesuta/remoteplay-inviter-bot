@@ -42,10 +42,14 @@ class SteamSetupCommand extends SubcommandInteraction {
     }
 
     // クライアントIDを登録
-    await daemonManager.bindUser(interaction.user, clientId);
+    await daemonManager.bindUser(
+      interaction.user,
+      clientId,
+      interaction.locale,
+    );
 
     // デーモンにバインドメッセージを送信
-    daemon.sendBindMessage(interaction.user.username);
+    daemon.sendBindMessage(interaction.user.username, interaction.locale);
 
     // メッセージを送信
     await interaction.editReply({

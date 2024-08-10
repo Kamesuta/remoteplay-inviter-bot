@@ -16,6 +16,7 @@ model UserData {
 
   userId        String  @unique // User ID
   name          String // User name
+  locale        String  @default("en") // User locale
   daemonId      String  @unique // Daemon ID
   daemonVersion String? // Version of the last connected daemon (for statistics)
 }

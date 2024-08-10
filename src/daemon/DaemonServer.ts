@@ -134,10 +134,13 @@ export class DaemonServer {
               daemonVersion,
             },
           });
-        }
 
-        // Send welcome message
-        daemonData.sendWelcomeMessage(userData?.name ?? undefined);
+          // Send welcome message
+          daemonData.sendWelcomeMessage(userData.name, userData.locale);
+        } else {
+          // Send link message
+          daemonData.sendLinkMessage();
+        }
       }),
     );
   }

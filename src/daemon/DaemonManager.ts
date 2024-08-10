@@ -50,21 +50,26 @@ export class DaemonManager {
    * Bind a user to a daemon
    * @param user user
    * @param daemonId daemon ID
+   * @param locale user locale
    */
-  async bindUser(user: User, daemonId: string): Promise<void> {
+  async bindUser(user: User, daemonId: string, locale: string): Promise<void> {
+    const daemonVersion = this.getDaemonFromId(daemonId)?.version ?? null;
     await prisma.userData.upsert({
       where: {
         userId: user.id,
       },
       update: {
         name: user.username,
+        locale,
         daemonId,
+        daemonVersion,
       },
       create: {
         userId: user.id,
         name: user.username,
+        locale,
         daemonId,
-        daemonVersion: this.getDaemonFromId(daemonId)?.version ?? null,
+        daemonVersion,
       },
     });
   }

@@ -29,6 +29,15 @@ invite_button:
     {{{link}}}
     リンクを踏んでゲームに参加してください～
 
+daemon:
+  welcome_message: |-
+    ようこそ、 {{username}} さん！
+    友達を招待するには `/steam invite` と入力してください。
+  link_message: Discordアカウントをリンクするには `/steam setup {{client_id}}` と入力してください。
+  bind_message: |-
+    {{username}} さんとリンクされました！
+    友達を招待するには `/steam invite` と入力してください。
+
 error:
   invalid_response_type: 招待主のクライアントから予期しないレスポンスタイプが返されました。
   invalid_response_message: 招待主のクライアントから予期しないレスポンスメッセージが返されました。
