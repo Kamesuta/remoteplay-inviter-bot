@@ -28,3 +28,12 @@ invite_button:
     招待リンクを作成しました！
     {{{link}}}
     リンクを踏んでゲームに参加してください～
+
+error:
+  invalid_response_type: 招待主のクライアントから予期しないレスポンスタイプが返されました。
+  invalid_response_message: 招待主のクライアントから予期しないレスポンスメッセージが返されました。
+  invalid_response_json: 招待主のクライアントから予期しないJSONが返されました。
+  send_request_failed: 招待リンク取得リクエストの送信に失敗しました。
+  daemon_unknown: 招待主のクライアントで不明なエラーが発生しました。
+  daemon_invalid_cmd: 招待主のクライアントがサーバーから送信されるリクエストのタイプに対応していません。クライアントが最新バージョンであることを確認してください。
+  daemon_invalid_app: Steamのゲームを起動していません。ゲームを起動してから再度お試しください。

@@ -28,3 +28,12 @@ invite_button:
     Invitation link created!
     {{{link}}}
     Click the link to join the game
+
+error:
+  invalid_response_type: Unexpected response type received from the host client.
+  invalid_response_message: Unexpected response message received from the host client.
+  invalid_response_json: Unexpected JSON received from the host client.
+  send_request_failed: Failed to send invitation link request.
+  daemon_unknown: Unknown error occurred on the host client.
+  daemon_invalid_cmd: The host client does not support the type of request sent from the server. Please make sure the client is up to date.
+  daemon_invalid_app: Steam game is not running. Please launch the game and try again.

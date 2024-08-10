@@ -1,6 +1,14 @@
 import { randomUUID, UUID } from 'crypto';
 import { User } from 'discord.js';
 import WebSocket from 'ws';
+import {
+  ClientError,
+  InvalidResponseJsonError,
+  InvalidResponseMessageError,
+  InvalidResponseTypeError,
+  SendRequestError,
+  TranslatableError,
+} from '../utils/error.js';
 
 /**
  * A data structure to represent a request to the daemon
@@ -67,24 +75,13 @@ class TypedDaemonRequest<T> implements DaemonRequest {
     if (type === this.type) {
       this.resolve?.(data as T);
     } else {
-      this.reject?.(new Error('Invalid response type'));
+      this.reject?.(new InvalidResponseTypeError());
     }
   }
 
   onReject(error: Error): void {
     this.reject?.(error);
   }
-}
-
-/**
- * Error messages
- */
-enum ErrorMessage {
-  /* eslint-disable @typescript-eslint/naming-convention */
-  invalid_message = 'Invalid message',
-  invalid_cmd = 'Invalid cmd',
-  invalid_app = 'Invalid app',
-  /* eslint-enable @typescript-eslint/naming-convention */
 }
 
 /**
@@ -117,7 +114,7 @@ export class DaemonClient {
       res = JSON.parse(message) as DaemonResponseData;
     } catch (_err) {
       // Reset the connection and reject all requests
-      this.close('message sent from daemon is not a valid JSON');
+      this._closeByError(new InvalidResponseJsonError());
       return;
     }
 
@@ -127,7 +124,7 @@ export class DaemonClient {
     // Validate if the message is error
     if (res.cmd === DaemonRequestType.error) {
       // Process the error
-      this._processError(res.id, res.data);
+      this._processErrorData(res.id, res.data);
       return;
     }
 
@@ -138,7 +135,7 @@ export class DaemonClient {
       res.data === null
     ) {
       // Process the error
-      this._processError(res.id, ErrorMessage.invalid_message);
+      this._processError(res.id, new InvalidResponseMessageError());
       return;
     }
 
@@ -173,35 +170,41 @@ export class DaemonClient {
    * @param requestId request ID
    * @param error error data
    */
-  private _processError(requestId: UUID, error: unknown): void {
+  private _processErrorData(requestId: UUID, error: unknown): void {
+    if (typeof error !== 'string') {
+      this._processError(requestId, new InvalidResponseMessageError());
+    } else {
+      this._processError(requestId, ClientError.fromType(error));
+    }
+  }
+
+  /**
+   * Process an error from the daemon
+   * @param requestId request ID
+   * @param error error
+   */
+  private _processError(requestId: UUID, error: TranslatableError): void {
     // Find the request
     const request = this._requests[requestId];
     if (request) {
       // Consume the request
       delete this._requests[requestId];
 
-      if (typeof error !== 'string') {
-        request.onReject(new Error('Invalid error response'));
-      } else if (error in ErrorMessage) {
-        request.onReject(
-          new Error(ErrorMessage[error as keyof typeof ErrorMessage]),
-        );
-      } else {
-        request.onReject(new Error(`Unknown error: ${error}`));
-      }
+      // Return the error
+      request.onReject(error);
     }
   }
 
   /**
    * Close the connection to the daemon and reject all requests
-   * @param reason close reason
+   * @param error error message
    */
-  close(reason?: string): void {
+  private _closeByError(error: TranslatableError): void {
     this._ws.close();
 
     // Reject all requests
     for (const [_requestId, request] of Object.entries(this._requests)) {
-      request.onReject(new Error(reason ?? 'Connection closed'));
+      request.onReject(error);
     }
   }
 
@@ -261,7 +264,7 @@ export class DaemonClient {
       };
       this._ws.send(JSON.stringify(requestData), (err) => {
         if (err) {
-          request.onReject(new Error('Failed to send message', err));
+          request.onReject(new SendRequestError());
         }
       });
     });
