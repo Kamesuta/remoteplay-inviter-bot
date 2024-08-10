@@ -1,3 +1,4 @@
+import { InteractionBase } from './interaction_base.js';
 import {
   ApplicationCommandDataResolvable,
   ApplicationCommandType,
@@ -6,10 +7,9 @@ import {
   MessageContextMenuCommandInteraction,
   UserContextMenuCommandInteraction,
 } from 'discord.js';
-import { InteractionBase } from './interaction_base.js';
 
 /**
- * ユーザーコンテキストメニュー
+ * User Context Menu Interaction
  */
 export abstract class UserContextMenuInteraction extends InteractionBase {
   abstract command: ContextMenuCommandBuilder;
@@ -23,15 +23,15 @@ export abstract class UserContextMenuInteraction extends InteractionBase {
 
   /** @inheritdoc */
   override async onInteractionCreate(interaction: Interaction): Promise<void> {
-    // ユーザーを右クリックしたときのコンテキストメニュー
+    // Context menu when right-clicking on a user
     if (!interaction.isUserContextMenuCommand()) return;
     if (interaction.commandName !== this.command.name) return;
     await this.onCommand(interaction);
   }
 
   /**
-   * コマンドが実行されたときに呼ばれる関数
-   * @param interaction インタラクション
+   * Function called when the command is executed
+   * @param interaction The interaction
    */
   abstract onCommand(
     interaction: UserContextMenuCommandInteraction,
@@ -39,7 +39,7 @@ export abstract class UserContextMenuInteraction extends InteractionBase {
 }
 
 /**
- * メッセージコンテキストメニュー
+ * Message Context Menu Interaction
  */
 export abstract class MessageContextMenuInteraction extends InteractionBase {
   abstract command: ContextMenuCommandBuilder;
@@ -53,15 +53,15 @@ export abstract class MessageContextMenuInteraction extends InteractionBase {
 
   /** @inheritdoc */
   override async onInteractionCreate(interaction: Interaction): Promise<void> {
-    // メッセージを右クリックしたときのコンテキストメニュー
+    // Context menu when right-clicking on a message
     if (!interaction.isMessageContextMenuCommand()) return;
     if (interaction.commandName !== this.command.name) return;
     await this.onCommand(interaction);
   }
 
   /**
-   * コマンドが実行されたときに呼ばれる関数
-   * @param interaction インタラクション
+   * Function called when the command is executed
+   * @param interaction The interaction
    */
   abstract onCommand(
     interaction: MessageContextMenuCommandInteraction,

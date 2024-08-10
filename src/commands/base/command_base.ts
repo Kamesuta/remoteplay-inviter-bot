@@ -1,3 +1,4 @@
+import { InteractionBase } from './interaction_base.js';
 import {
   ApplicationCommandDataResolvable,
   ChatInputCommandInteraction,
@@ -7,22 +8,21 @@ import {
   SlashCommandSubcommandGroupBuilder,
   SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js';
-import { InteractionBase } from './interaction_base.js';
 
 /**
- * コマンドベースのインタラクション
+ * Command-based interaction
  */
 interface CommandBasedInteraction {
   /**
-   * 自分のインタラクションかどうかを判定するための関数
-   * @param interaction インタラクション
-   * @returns 自分のインタラクションかどうか
+   * Function to determine if it is my interaction
+   * @param interaction The interaction
+   * @returns Whether it is my interaction or not
    */
   isMyInteraction(interaction: ChatInputCommandInteraction): boolean;
 }
 
 /**
- * コマンドグループ
+ * Command group
  */
 export abstract class CommandGroupInteraction
   extends InteractionBase
@@ -44,7 +44,7 @@ export abstract class CommandGroupInteraction
 }
 
 /**
- * サブコマンドグループ
+ * Subcommand group
  */
 export abstract class SubcommandGroupInteraction
   extends InteractionBase
@@ -53,8 +53,8 @@ export abstract class SubcommandGroupInteraction
   abstract command: SlashCommandSubcommandGroupBuilder;
 
   /**
-   * コンストラクタ
-   * @param _registry サブコマンドグループを登録する先
+   * Constructor
+   * @param _registry The destination to register the subcommand group
    */
   constructor(private _registry: CommandGroupInteraction) {
     super();
@@ -75,7 +75,7 @@ export abstract class SubcommandGroupInteraction
 }
 
 /**
- * コマンド
+ * Command
  */
 export abstract class CommandInteraction
   extends InteractionBase
@@ -103,14 +103,14 @@ export abstract class CommandInteraction
   }
 
   /**
-   * コマンドが実行されたときに呼ばれる関数
-   * @param interaction インタラクション
+   * Function called when the command is executed
+   * @param interaction The interaction
    */
   abstract onCommand(interaction: ChatInputCommandInteraction): Promise<void>;
 }
 
 /**
- * サブコマンド
+ * Subcommand
  */
 export abstract class SubcommandInteraction
   extends InteractionBase
@@ -119,8 +119,8 @@ export abstract class SubcommandInteraction
   abstract command: SlashCommandSubcommandBuilder;
 
   /**
-   * コンストラクタ
-   * @param _registry サブコマンドグループを登録する先
+   * Constructor
+   * @param _registry The destination to register the subcommand group
    */
   constructor(
     private _registry: CommandGroupInteraction | SubcommandGroupInteraction,
@@ -149,8 +149,8 @@ export abstract class SubcommandInteraction
   }
 
   /**
-   * コマンドが実行されたときに呼ばれる関数
-   * @param interaction インタラクション
+   * Function called when the command is executed
+   * @param interaction The interaction
    */
   abstract onCommand(interaction: ChatInputCommandInteraction): Promise<void>;
 }

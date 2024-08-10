@@ -1,3 +1,4 @@
+import { InteractionBase } from './interaction_base.js';
 import {
   Interaction,
   MappedComponentBuilderTypes,
@@ -5,26 +6,25 @@ import {
   ModalBuilder,
   ModalSubmitInteraction,
 } from 'discord.js';
-import { InteractionBase } from './interaction_base.js';
 
 /**
- * アクション
+ * Action Interaction
  */
 abstract class ActionInteraction<
   MenuInteraction extends Interaction & { customId: string },
 > extends InteractionBase {
   /**
-   * コンストラクタ
-   * @param _id アクションを識別するためのID
+   * Constructor
+   * @param _id ID to identify the action
    */
   constructor(private _id: string) {
     super();
   }
 
   /**
-   * カスタムIDを生成
-   * @param data カスタムIDに含めるデータ
-   * @returns カスタムID
+   * Create a custom ID
+   * @param data Data to include in the custom ID
+   * @returns Custom ID
    */
   protected createCustomId(data?: Record<string, string>): string {
     const params = new URLSearchParams({
@@ -36,9 +36,9 @@ abstract class ActionInteraction<
   }
 
   /**
-   * カスタムIDが自分のものか確認
-   * @param params カスタムIDのパラメータ
-   * @returns 自分のものかどうか
+   * Check if the custom ID belongs to this action
+   * @param params Custom ID parameters
+   * @returns Whether it belongs to this action or not
    */
   protected isMyCustomId(params: URLSearchParams): boolean {
     if (params.get('_') !== this._id) return false;
@@ -46,9 +46,9 @@ abstract class ActionInteraction<
   }
 
   /**
-   * インタラクションの型が一致するか確認
-   * @param interaction インタラクション
-   * @returns 一致するかどうか
+   * Check if the interaction type matches
+   * @param interaction Interaction
+   * @returns Whether it matches or not
    */
   protected abstract isType(
     interaction: Interaction,
@@ -56,10 +56,10 @@ abstract class ActionInteraction<
 
   /** @inheritdoc */
   override async onInteractionCreate(interaction: Interaction): Promise<void> {
-    // 型が一致しない場合は無視
+    // Ignore if the type does not match
     if (!this.isType(interaction)) return;
 
-    // カスタムIDをパースし、自分のアクションか確認
+    // Parse the custom ID and check if it belongs to this action
     const params = new URLSearchParams(interaction.customId);
     if (!this.isMyCustomId(params)) return;
 
@@ -67,9 +67,9 @@ abstract class ActionInteraction<
   }
 
   /**
-   * コマンドが実行されたときに呼ばれる関数
-   * @param interaction インタラクション
-   * @param params カスタムIDのパラメータ
+   * Function called when the command is executed
+   * @param interaction Interaction
+   * @param params Custom ID parameters
    */
   abstract onCommand(
     interaction: MenuInteraction,
@@ -78,15 +78,15 @@ abstract class ActionInteraction<
 }
 
 /**
- * メッセージコンポーネントのアクション
+ * Message Component Action Interaction
  */
 export abstract class MessageComponentActionInteraction<
   MenuComponentType extends keyof MappedInteractionTypes,
 > extends ActionInteraction<MappedInteractionTypes[MenuComponentType]> {
   /**
-   * コンストラクタ
-   * @param id アクションを識別するためのID
-   * @param _type コンポーネントの種類
+   * Constructor
+   * @param id ID to identify the action
+   * @param _type Component type
    */
   constructor(
     id: string,
@@ -96,8 +96,8 @@ export abstract class MessageComponentActionInteraction<
   }
 
   /**
-   * ビルダーの作成を行う
-   * @returns 作成したビルダー
+   * Create a builder
+   * @returns Created builder
    */
   abstract create(
     ...args: unknown[]
@@ -131,20 +131,20 @@ export abstract class MessageComponentActionInteraction<
 }
 
 /**
- * モーダルダイアログのアクション
+ * Modal Action Interaction
  */
 export abstract class ModalActionInteraction extends ActionInteraction<ModalSubmitInteraction> {
   /**
-   * コンストラクタ
-   * @param id アクションを識別するためのID
+   * Constructor
+   * @param id ID to identify the action
    */
   constructor(id: string) {
     super(id);
   }
 
   /**
-   * ビルダーの作成を行う
-   * @returns 作成したビルダー
+   * Create a builder
+   * @returns Created builder
    */
   abstract create(...args: unknown[]): ModalBuilder;
 

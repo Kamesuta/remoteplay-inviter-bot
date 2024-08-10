@@ -1,27 +1,27 @@
 import { ApplicationCommandDataResolvable, Interaction } from 'discord.js';
 
 /**
- * コマンド/ボタン/コンテキストメニューなどの操作の基底クラス
+ * Base class for handling commands, buttons, context menus, etc.
  */
 export abstract class InteractionBase {
   /**
-   * ApplicationCommandManagerにコマンドを登録するための関数です
-   * commandListにpush_backして登録することで、すべてのコマンドの登録後にまとめてDiscordにコマンドが登録されます
-   * @param _commandList ApplicationCommandManagerに登録するコマンドのリスト
+   * Function for registering commands in the ApplicationCommandManager.
+   * By pushing the commands to the commandList and registering them, all commands will be registered with Discord after all commands have been added.
+   * @param _commandList The list of commands to register in the ApplicationCommandManager.
    */
   registerCommands(_commandList: ApplicationCommandDataResolvable[]): void {}
 
   /**
-   * 他のInteractionBase(コマンドなど)に対してサブコマンドを登録するための関数です
-   * すべてのサブコマンドの登録後、registerCommands()が呼ばれます
+   * Function for registering subcommands to other InteractionBase (commands, etc.).
+   * After registering all subcommands, registerCommands() will be called.
    */
   registerSubCommands(): void {}
 
   /**
-   * InteractionCreateイベントが発生したときに呼ばれる関数です
-   * 登録されているすべてのInteractionBaseに対して呼ばれます。
-   * if文で必要な処理を行うか判断し、処理を行ってください。
-   * @param _interaction InteractionCreateイベントが発生したときのInteraction
+   * Function called when the InteractionCreate event occurs.
+   * It is called for all registered InteractionBase.
+   * Use if statements to determine the necessary actions and perform them.
+   * @param _interaction The Interaction when the InteractionCreate event occurs.
    */
   async onInteractionCreate(_interaction: Interaction): Promise<void> {}
 }

@@ -2,6 +2,7 @@ import { ApplicationCommandDataResolvable, Interaction } from 'discord.js';
 import { client } from '../index.js';
 import { logger } from '../utils/log.js';
 import { InteractionBase } from './base/interaction_base.js';
+
 /**
  * Command Handler
  */
