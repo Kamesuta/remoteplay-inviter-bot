@@ -40,6 +40,21 @@ invite_button:
     招待リンクを作成しました！
     {{{link}}}
     リンクを踏んでゲームに参加してください～
+  how_to_join_mobile:
+    name: 参加手順 (スマホの場合)
+    value: |-
+      1. ↑のリンクを踏んでください
+      2. ページ内の iOS/Android リンクを押してSteam Linkアプリをインストールしてください
+      3. ページ内の「ゲームに参加」ボタンを押して、アプリを開きます
+  how_to_join_pc:
+    name: 参加手順 (PCの場合)
+    value: |-
+      1. ↑のリンクを踏んでください
+      2. (Steamクライアントが入っていない人は) ページ内の Windows/macOS/Linux リンクを押してSteam Linkアプリをインストールしてください
+      3. コントローラー(Proコン、Joyコン、PlayStationコン、Xboxコンなど)をPCに接続してください
+        ない人は [x360ceインストール手順](https://bit.ly/x360ce-tutorial) に沿ってコントローラーエミュレーターをインストールしてください
+        x360ceがうまくいかない場合は、スマホでプレイできるので、そっちをお試しください
+      4. ページ内の「ゲームに参加」ボタンを押して、Steam Linkアプリを開きます
 
 daemon:
   welcome_message: |-

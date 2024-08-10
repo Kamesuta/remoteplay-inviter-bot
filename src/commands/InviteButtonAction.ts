@@ -3,6 +3,7 @@ import {
   ButtonInteraction,
   ButtonStyle,
   ComponentType,
+  EmbedBuilder,
 } from 'discord.js';
 import { MessageComponentActionInteraction } from './base/action_base.js';
 import { daemonManager } from '../index.js';
@@ -89,6 +90,32 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
       });
     if (!link) return;
 
+    // Create the embed message
+    const embed = new EmbedBuilder()
+      .addFields(
+        {
+          name: i18n.__({
+            phrase: 'invite_button.how_to_join_mobile.name',
+            locale: interaction.locale,
+          }),
+          value: i18n.__({
+            phrase: 'invite_button.how_to_join_mobile.value',
+            locale: interaction.locale,
+          }),
+        },
+        {
+          name: i18n.__({
+            phrase: 'invite_button.how_to_join_pc.name',
+            locale: interaction.locale,
+          }),
+          value: i18n.__({
+            phrase: 'invite_button.how_to_join_pc.value',
+            locale: interaction.locale,
+          }),
+        },
+      )
+      .setColor(3447003); // DarkBlue
+
     // Send the invite
     await interaction.editReply({
       content: i18n.__(
@@ -98,6 +125,7 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
         },
         { link },
       ),
+      embeds: [embed],
     });
   }
 }

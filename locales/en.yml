@@ -40,6 +40,21 @@ invite_button:
     Invitation link created!
     {{{link}}}
     Click the link to join the game
+  how_to_join_mobile:
+    name: How to Join (For Mobile)
+    value: |-
+      1. Click the link above.
+      2. Install the Steam Link app by clicking on the iOS/Android link on the page.
+      3. Press the "Join Game" button on the page to open the app.
+  how_to_join_pc:
+    name: How to Join (For PC)
+    value: |-
+      1. Click the link above.
+      2. (For those who don't have the Steam client) Install the Steam Link app by clicking on the Windows/macOS/Linux link on the page.
+      3. Connect a controller (Pro Controller, Joy-Con, PlayStation Controller, Xbox Controller, etc.) to your PC.
+         If you don't have one, please install a controller emulator following the [x360ce installation guide](https://bit.ly/x360ce-tutorial).
+         If x360ce doesn't work, you can try playing on your mobile device.
+      4. Press the "Join Game" button on the page to open the Steam Link app.
 
 daemon:
   welcome_message: |-

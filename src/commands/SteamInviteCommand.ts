@@ -161,35 +161,16 @@ class SteamInviteCommand extends SubcommandInteraction {
           locale: interaction.locale,
         }),
       )
-      .addFields(
-        {
-          name: i18n.__({
-            phrase: 'invite_panel.features.name',
-            locale: interaction.locale,
-          }),
-          value: i18n.__({
-            phrase: 'invite_panel.features.value',
-            locale: interaction.locale,
-          }),
-        },
-        {
-          name: '参加手順 (スマホの場合)',
-          value:
-            '1. ↓の「招待リンク取得」を押してリンクを踏んでください\n' +
-            '2. ページ内の iOS/Android リンクを押してSteam Linkアプリをインストールしてください\n' +
-            '3. ページ内の「ゲームに参加」ボタンを押して、アプリを開きます',
-        },
-        {
-          name: '参加手順 (PCの場合)',
-          value:
-            '1. ↓の「招待リンク取得」を押してリンクを踏んでください\n' +
-            '2. (Steamクライアントが入っていない人は) ページ内の Windows/macOS/Linux リンクを押してSteam Linkアプリをインストールしてください\n' +
-            '3. コントローラー(Proコン、Joyコン、PlayStationコン、Xboxコンなど)をPCに接続してください\n' +
-            '  ない人は [x360ceインストール手順](https://bit.ly/x360ce-tutorial) に沿ってコントローラーエミュレーターをインストールしてください\n' +
-            '  x360ceがうまくいかない場合は、スマホでプレイできるので、そっちをお試しください\n' +
-            '4. ページ内の「ゲームに参加」ボタンを押して、Steam Linkアプリを開きます',
-        },
-      )
+      .addFields({
+        name: i18n.__({
+          phrase: 'invite_panel.features.name',
+          locale: interaction.locale,
+        }),
+        value: i18n.__({
+          phrase: 'invite_panel.features.value',
+          locale: interaction.locale,
+        }),
+      })
       .setImage(headerImage)
       .setColor(3447003); // DarkBlue
 
