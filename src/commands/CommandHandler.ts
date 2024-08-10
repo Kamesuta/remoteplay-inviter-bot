@@ -2,50 +2,49 @@ import { ApplicationCommandDataResolvable, Interaction } from 'discord.js';
 import { client } from '../index.js';
 import { logger } from '../utils/log.js';
 import { InteractionBase } from './base/interaction_base.js';
-
 /**
- * コマンドハンドラー
+ * Command Handler
  */
 export default class CommandHandler {
   /**
-   * コマンドハンドラーを初期化します
-   * @param _commands コマンドリスト
+   * Initializes the command handler
+   * @param _commands Command list
    */
   constructor(private _commands: InteractionBase[]) {}
 
   /**
-   * コマンドを登録します
+   * Registers the commands
    */
   async registerCommands(): Promise<void> {
-    // 登録するコマンドリスト
+    // List of commands to register
     const applicationCommands: ApplicationCommandDataResolvable[] = [];
 
-    // サブコマンドを構築
+    // Build subcommands
     this._commands.forEach((command) => command.registerSubCommands());
 
-    // コマンドを構築
+    // Build commands
     this._commands.forEach((command) =>
       command.registerCommands(applicationCommands),
     );
 
-    // コマンドを登録
+    // Register commands
     await client.application?.commands.set(applicationCommands);
   }
 
   /**
-   * イベントコマンドを処理します
-   * @param interaction インタラクション
+   * Handles the interaction create event
+   * @param interaction Interaction
    */
   async onInteractionCreate(interaction: Interaction): Promise<void> {
     try {
-      // すべてのコマンドを処理
+      // Process all commands
       await Promise.all(
         this._commands.map((command) =>
           command.onInteractionCreate(interaction),
         ),
       );
     } catch (error) {
-      logger.error('onInteractionCreate中にエラーが発生しました。', error);
+      logger.error('An error occurred during onInteractionCreate.', error);
     }
   }
 }

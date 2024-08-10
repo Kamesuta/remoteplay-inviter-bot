@@ -1,3 +1,15 @@
+steam_command:
+  description: Steam Remote Play Together 招待リンク作成コマンド
+
+setup_command:
+  description: クライアントIDを入力し、DiscordアカウントとRemote Play Inviterクライアントをリンクします。
+  description_client_id: Remote Play InviterクライアントのクライアントID
+  error:
+    daemon_offline: そのクライアントはオンラインではありません。クライアントを起動してから再度お試しください。
+  setup_message: |-
+    Remote Play InviterクライアントとDiscordアカウントがリンクされました！
+    友達を招待するには `/steam invite` と入力してください。
+
 invite_command:
   description: Steam Remote Play Together を使用して起動中のゲームに招待します。
   error:

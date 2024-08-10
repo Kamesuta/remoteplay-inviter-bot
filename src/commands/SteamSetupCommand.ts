@@ -5,15 +5,20 @@ import {
 import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
+import { forDiscord, i18n } from '../utils/i18n.js';
 
 class SteamSetupCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
     .setName('setup')
-    .setDescription('RemotePlayInviterクライアントUUIDを登録します')
+    .setDescription(i18n.__('setup_command.description'))
+    .setDescriptionLocalizations(forDiscord('setup_command.description'))
     .addStringOption((option) =>
       option
         .setName('client_id')
-        .setDescription('RemotePlayInviterクライアントのUUID')
+        .setDescription(i18n.__('setup_command.description_client_id'))
+        .setDescriptionLocalizations(
+          forDiscord('setup_command.description_client_id'),
+        )
         .setRequired(true),
     );
 
@@ -22,38 +27,38 @@ class SteamSetupCommand extends SubcommandInteraction {
   ): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
 
-    // クライアントIDを取得
+    // Get the client ID
     const clientId = interaction.options.getString('client_id');
-    if (!clientId) {
-      await interaction.editReply({
-        content: 'クライアントIDが指定されていません',
-      });
-      return;
-    }
+    if (!clientId) return;
 
     // Send bind message if the daemon is connected
     const daemon = daemonManager.getDaemonFromId(clientId);
     if (!daemon) {
       await interaction.editReply({
-        content:
-          'そのクライアントIDはオンラインではありません。クライアントを起動してから再度お試しください。',
+        content: i18n.__({
+          phrase: 'setup_command.error.daemon_offline',
+          locale: interaction.locale,
+        }),
       });
       return;
     }
 
-    // クライアントIDを登録
+    // Register the client ID
     await daemonManager.bindUser(
       interaction.user,
       clientId,
       interaction.locale,
     );
 
-    // デーモンにバインドメッセージを送信
+    // Send bind message to the daemon
     daemon.sendBindMessage(interaction.user.username, interaction.locale);
 
-    // メッセージを送信
+    // Send the setup message
     await interaction.editReply({
-      content: 'クライアントIDを登録しました',
+      content: i18n.__({
+        phrase: 'setup_command.setup_message',
+        locale: interaction.locale,
+      }),
     });
   }
 }
