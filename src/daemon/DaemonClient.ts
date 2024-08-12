@@ -18,7 +18,6 @@ import {
   RequestMessageType,
   ServerMessage,
 } from './DaemonModels.js';
-import random from 'lodash/random';
 
 /**
  * Daemon Request
@@ -60,18 +59,17 @@ export class DaemonClient {
   /** Requests */
   private _requests: Record<UUID, DaemonRequest> = {};
 
-  /** Session ID */
-  public sessionId: number = random(0, 99999); // Random session ID
-
   /**
    * Constructor
    * @param uuid daemon UUID
    * @param version daemon version
+   * @param sessionId session ID
    * @param _ws WebSocket connection
    */
   constructor(
     public uuid: string,
     public version: string,
+    public sessionId: number,
     private _ws: WebSocket,
   ) {}
 

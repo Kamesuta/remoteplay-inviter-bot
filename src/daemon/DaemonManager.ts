@@ -14,17 +14,20 @@ export class DaemonManager {
    * Register a daemon
    * @param daemonId daemon ID
    * @param daemonVersion daemon version
+   * @param daemonSessionId daemon session ID
    * @param ws WebSocket connection to the daemon
    * @returns DaemonClient instance
    */
   registerDaemon(
     daemonId: string,
     daemonVersion: string,
+    daemonSessionId: number,
     ws: WebSocket,
   ): DaemonClient {
     return (this._daemons[daemonId] = new DaemonClient(
       daemonId,
       daemonVersion,
+      daemonSessionId,
       ws,
     ));
   }

@@ -74,34 +74,63 @@ export class DaemonServer {
    */
   private _upgrade(request: Request, socket: Socket, head: Buffer): void {
     const {
-      query: { token: daemonId, v: daemonVersion },
+      query: {
+        token: daemonId,
+        v: daemonVersion,
+        session: daemonSessionIdText,
+      },
     } = parse(request.url, true);
-
-    if (!daemonId || typeof daemonId !== 'string') {
-      socket.write('HTTP/1.1 401 Unauthorized\n\n');
-      socket.destroy();
-      return;
-    }
 
     if (
       // Check if the daemon version is string
       typeof daemonVersion !== 'string' ||
       // Check if the daemon version is valid
-      !semver.valid(daemonVersion) ||
+      !semver.valid(daemonVersion)
+    ) {
+      this._sendErrorMessage(socket, {
+        error: DaemonErrorType.invalidVersion,
+        message: 'Invalid client version',
+      });
+      return;
+    }
+
+    if (
       // Check if the daemon version is less than the required version
       !semver.gte(daemonVersion, DAEMON_REQUIRED_VERSION)
     ) {
-      // Create a message for the outdated daemon
-      const message: ConnectionErrorMessage = {
+      this._sendErrorMessage(socket, {
         error: DaemonErrorType.outdated,
         required: DAEMON_REQUIRED_VERSION,
         download: DAEMON_DOWNLOAD_URL,
-      };
+        message: 'Client version is outdated',
+      });
+      return;
+    }
 
-      // Send the message to the daemon using X-Error header
-      const versionJson = JSON.stringify(message);
-      socket.write(`HTTP/1.1 400 Bad Request\nX-Error: ${versionJson}\n\n`);
-      socket.destroy();
+    if (
+      // Check if the daemon ID is string
+      typeof daemonId !== 'string' ||
+      // UUID length is 36 characters
+      daemonId.length > 36
+    ) {
+      this._sendErrorMessage(socket, {
+        error: DaemonErrorType.invalidToken,
+        message: 'Invalid client UUID',
+      });
+      return;
+    }
+
+    let daemonSessionId: number;
+    if (
+      // Check if the daemon session ID is string
+      typeof daemonSessionIdText !== 'string' ||
+      // Parse the daemon session ID
+      isNaN((daemonSessionId = parseInt(daemonSessionIdText)))
+    ) {
+      this._sendErrorMessage(socket, {
+        error: DaemonErrorType.invalidSession,
+        message: 'Invalid session ID',
+      });
       return;
     }
 
@@ -115,6 +144,7 @@ export class DaemonServer {
         const daemonData = this._manager.registerDaemon(
           daemonId,
           daemonVersion,
+          daemonSessionId,
           ws,
         );
 
@@ -145,6 +175,21 @@ export class DaemonServer {
         }
       }),
     );
+  }
+
+  /**
+   * Send an error message to the daemon for an invalid version
+   * @param socket websocket connection
+   * @param message error message
+   */
+  private _sendErrorMessage(
+    socket: Socket,
+    message: ConnectionErrorMessage,
+  ): void {
+    // Send the message to the daemon using X-Error header
+    const versionJson = JSON.stringify(message);
+    socket.write(`HTTP/1.1 400 Bad Request\nX-Error: ${versionJson}\n\n`);
+    socket.destroy();
   }
 
   /**

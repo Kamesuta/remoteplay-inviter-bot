@@ -5,8 +5,14 @@ import { ClientErrorMessageType } from '../utils/error.js';
  * Error types for the daemon server
  */
 export enum DaemonErrorType {
+  /** Invalid version */
+  invalidVersion = 'invalid_version',
   /** Outdated daemon */
   outdated = 'outdated',
+  /** Invalid daemon ID */
+  invalidToken = 'invalid_token',
+  /** Invalid session ID */
+  invalidSession = 'invalid_session',
 }
 
 /**
@@ -33,7 +39,9 @@ export interface ConnectionErrorMessageOutdated
 /**
  * Connection error messages
  */
-export type ConnectionErrorMessage = ConnectionErrorMessageOutdated;
+export type ConnectionErrorMessage =
+  | ConnectionErrorMessageBase
+  | ConnectionErrorMessageOutdated;
 
 /**
  * Request Type
