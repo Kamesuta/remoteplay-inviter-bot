@@ -15,18 +15,21 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
    * Creates an invite link button
    * @param userId User ID
    * @param gameId Game ID
+   * @param sessionId Session ID
    * @param locale Locale
    * @returns The created builder
    */
   override create(
     userId: string,
     gameId: number,
+    sessionId: number,
     locale: string,
   ): ButtonBuilder {
     // Generate custom ID
     const customId = this.createCustomId({
       user: `${userId}`,
       game: `${gameId}`,
+      session: `${sessionId}`,
     });
 
     // Create the button
@@ -49,7 +52,8 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
   ): Promise<void> {
     const userId = params.get('user');
     const gameId = params.get('game');
-    if (!userId || !gameId) return;
+    const sessionId = params.get('session');
+    if (!userId || !gameId || !sessionId) return;
 
     // Get the user ID
     const daemonId = await daemonManager.getDaemonIdFromUser(userId);
@@ -71,6 +75,18 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
         ephemeral: true,
         content: i18n.__({
           phrase: 'invite_button.error.daemon_offline',
+          locale: interaction.locale,
+        }),
+      });
+      return;
+    }
+
+    // Check if the user is in the session
+    if (`${daemon.sessionId}` !== sessionId) {
+      await interaction.reply({
+        ephemeral: true,
+        content: i18n.__({
+          phrase: 'invite_button.error.invalid_session',
           locale: interaction.locale,
         }),
       });

@@ -111,31 +111,44 @@ class SteamInviteCommand extends SubcommandInteraction {
       return;
     }
 
-    // Send the invite
-    await this.sendInviteMessage(
+    // Create the invite message
+    const embed = this._createInviteMessage(
       interaction,
-      gameId,
       name,
       headerImage,
       storeLink,
     );
+
+    // Send the invite message
+    await interaction.editReply({
+      embeds: [embed],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          InviteButtonAction.create(
+            interaction.user.id,
+            gameId,
+            daemon.sessionId,
+            interaction.locale,
+          ),
+        ),
+      ],
+    });
   }
 
   /**
-   * Send the invite message
+   * Create the invite message
    * @param interaction interaction to reply
-   * @param gameId game id
    * @param name game name
    * @param headerImage game header image
    * @param storeLink game store link
+   * @returns Invite message
    */
-  async sendInviteMessage(
+  private _createInviteMessage(
     interaction: RepliableInteraction,
-    gameId: number,
     name: string,
     headerImage: string,
     storeLink: string,
-  ): Promise<void> {
+  ): EmbedBuilder {
     // Get display name
     const member =
       interaction.member instanceof GuildMember
@@ -181,19 +194,7 @@ class SteamInviteCommand extends SubcommandInteraction {
       .setImage(headerImage)
       .setColor(3447003); // DarkBlue
 
-    // Send the invite message
-    await interaction.editReply({
-      embeds: [embed],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          InviteButtonAction.create(
-            interaction.user.id,
-            gameId,
-            interaction.locale,
-          ),
-        ),
-      ],
-    });
+    return embed;
   }
 }
 

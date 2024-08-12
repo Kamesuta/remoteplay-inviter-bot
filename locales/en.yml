@@ -8,7 +8,7 @@ setup_command:
     daemon_offline: |-
       The client is currently offline.
       Please download and launch the Steam Remote Play Inviter client from the following link and try again.
-      {{daemon_download_url}}
+      {{{daemon_download_url}}}
   setup_message: |-
     Remote Play Inviter client and Discord account have been linked!
     To invite friends, type `/steam invite`.
@@ -38,6 +38,7 @@ invite_button:
   error:
     daemon_not_linked: The host has not registered their client ID.
     daemon_offline: The host is offline.
+    invalid_session: This invitation panel has expired. Please ask the host to enter `/steam invite` again.
     request_failed: Failed to send invitation request. The host may not have started the game.
   invite_message: |-
     Invitation link created!

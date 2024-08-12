@@ -18,6 +18,7 @@ import {
   RequestMessageType,
   ServerMessage,
 } from './DaemonModels.js';
+import random from 'lodash/random';
 
 /**
  * Daemon Request
@@ -58,6 +59,9 @@ class TypedDaemonRequest<Message extends ClientMessage>
 export class DaemonClient {
   /** Requests */
   private _requests: Record<UUID, DaemonRequest> = {};
+
+  /** Session ID */
+  public sessionId: number = random(0, 99999); // Random session ID
 
   /**
    * Constructor

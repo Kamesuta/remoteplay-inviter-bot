@@ -59,6 +59,16 @@ export class InvalidResponseJsonError extends TranslatableError {
 }
 
 /**
+ * Error for invalid session
+ */
+export class InvalidSessionError extends TranslatableError {
+  /** Constructor */
+  constructor() {
+    super('error.invalid_session');
+  }
+}
+
+/**
  * Error for failed request sending
  */
 export class SendRequestError extends TranslatableError {

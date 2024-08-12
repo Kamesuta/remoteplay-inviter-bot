@@ -138,7 +138,7 @@ export class DaemonServer {
           });
 
           // Send welcome message
-          daemonData.sendWelcomeMessage(userData.name, userData.locale);
+          daemonData.sendWelcomeMessage(userData.locale, userData.name);
         } else {
           // Send link message
           daemonData.sendLinkMessage();

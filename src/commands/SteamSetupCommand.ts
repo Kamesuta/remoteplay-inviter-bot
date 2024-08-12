@@ -56,7 +56,7 @@ class SteamSetupCommand extends SubcommandInteraction {
     );
 
     // Send bind message to the daemon
-    daemon.sendBindMessage(interaction.user.username, interaction.locale);
+    daemon.sendBindMessage(interaction.locale, interaction.user.username);
 
     // Send the setup message
     await interaction.editReply({
