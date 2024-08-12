@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import WebSocket from 'ws';
-import { resolve } from 'path';
 import { createServer } from 'http';
 import { parse } from 'url';
 import { Socket } from 'net';
@@ -9,9 +8,7 @@ import { DaemonManager } from './DaemonManager.js';
 import semver from 'semver';
 import { nowait } from '../utils/utils.js';
 import { prisma } from '../index.js';
-
-/** Required version */
-const requiredVersion = '0.1.0';
+import { DAEMON_DOWNLOAD_URL, DAEMON_REQUIRED_VERSION } from '../env.js';
 
 /**
  * Represents a daemon server that handles WebSocket connections and HTTP requests.
@@ -64,7 +61,8 @@ export class DaemonServer {
    * @param res response
    */
   private _index(_req: Request, res: Response): void {
-    res.sendFile(resolve('./index.html'));
+    // Redirect to DAEMON_DOWNLOAD_URL
+    res.redirect(DAEMON_DOWNLOAD_URL);
   }
 
   /**
@@ -93,10 +91,10 @@ export class DaemonServer {
       socket.destroy();
       return;
     }
-    if (!semver.gte(daemonVersion, requiredVersion)) {
+    if (!semver.gte(daemonVersion, DAEMON_REQUIRED_VERSION)) {
       const versionJson = JSON.stringify({
-        required: requiredVersion,
-        download: 'https://example.com',
+        required: DAEMON_REQUIRED_VERSION,
+        download: DAEMON_DOWNLOAD_URL,
       });
       socket.write(`HTTP/1.1 426 Upgrade Required\r\n\r\n${versionJson}`);
       socket.destroy();
