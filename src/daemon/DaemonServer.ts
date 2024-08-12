@@ -9,14 +9,7 @@ import semver from 'semver';
 import { nowait } from '../utils/utils.js';
 import { prisma } from '../index.js';
 import { DAEMON_DOWNLOAD_URL, DAEMON_REQUIRED_VERSION } from '../env.js';
-
-/**
- * Error types for the daemon server
- */
-enum DaemonErrorType {
-  /** Outdated daemon */
-  outdated = 'outdated',
-}
+import { ConnectionErrorMessage, DaemonErrorType } from './DaemonModels.js';
 
 /**
  * Represents a daemon server that handles WebSocket connections and HTTP requests.
@@ -91,16 +84,22 @@ export class DaemonServer {
     }
 
     if (
-      !daemonVersion ||
+      // Check if the daemon version is string
       typeof daemonVersion !== 'string' ||
+      // Check if the daemon version is valid
       !semver.valid(daemonVersion) ||
+      // Check if the daemon version is less than the required version
       !semver.gte(daemonVersion, DAEMON_REQUIRED_VERSION)
     ) {
-      const versionJson = JSON.stringify({
+      // Create a message for the outdated daemon
+      const message: ConnectionErrorMessage = {
         error: DaemonErrorType.outdated,
         required: DAEMON_REQUIRED_VERSION,
         download: DAEMON_DOWNLOAD_URL,
-      });
+      };
+
+      // Send the message to the daemon using X-Error header
+      const versionJson = JSON.stringify(message);
       socket.write(`HTTP/1.1 400 Bad Request\nX-Error: ${versionJson}\n\n`);
       socket.destroy();
       return;

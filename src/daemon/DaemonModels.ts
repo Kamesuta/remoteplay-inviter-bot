@@ -2,6 +2,40 @@ import { UUID } from 'crypto';
 import { ClientErrorMessageType } from '../utils/error.js';
 
 /**
+ * Error types for the daemon server
+ */
+export enum DaemonErrorType {
+  /** Outdated daemon */
+  outdated = 'outdated',
+}
+
+/**
+ * Connection error message
+ */
+interface ConnectionErrorMessageBase {
+  /** Error message */
+  message?: string;
+  /** Error type */
+  error: DaemonErrorType;
+}
+
+/** When error is outdated */
+export interface ConnectionErrorMessageOutdated
+  extends ConnectionErrorMessageBase {
+  /** Error type */
+  error: DaemonErrorType.outdated;
+  /** Required version */
+  required: string;
+  /** Download URL */
+  download: string;
+}
+
+/**
+ * Connection error messages
+ */
+export type ConnectionErrorMessage = ConnectionErrorMessageOutdated;
+
+/**
  * Request Type
  */
 export enum DaemonCmd {
