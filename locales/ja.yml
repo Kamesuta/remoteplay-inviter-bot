@@ -5,7 +5,10 @@ setup_command:
   description: クライアントIDを入力し、DiscordアカウントとRemote Play Inviterクライアントをリンクします。
   description_client_id: Remote Play InviterクライアントのクライアントID
   error:
-    daemon_offline: そのクライアントはオンラインではありません。クライアントを起動してから再度お試しください。
+    daemon_offline: |-
+      クライアントがオフラインです。
+      以下から Steam Remote Play Inviter クライアントをダウンロードし、起動した上で再度お試しください。
+      {{daemon_download_url}}
   setup_message: |-
     Remote Play InviterクライアントとDiscordアカウントがリンクされました！
     友達を招待するには `/steam invite` と入力してください。
@@ -14,7 +17,7 @@ invite_command:
   description: Steam Remote Play Together を使用して起動中のゲームに招待します。
   error:
     daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
-    daemon_offline: クライアントがオフラインです。
+    daemon_offline: クライアントがオフラインです。Steam Remote Play Inviter クライアントを起動してから再度お試しください。
     game_info_failed: ゲーム情報が取得できませんでした。
 
 invite_panel:
@@ -60,7 +63,9 @@ daemon:
   welcome_message: |-
     ようこそ、 {{username}} さん！
     友達を招待するには `/steam invite` と入力してください。
-  link_message: Discordアカウントをリンクするには `/steam setup {{client_id}}` と入力してください。
+  link_message: |-
+    Discordアカウントをリンクするには `/steam setup client_id:{{client_id}}` と入力してください。
+    クリップボードにコピーしておきましたので、Discordのチャットに貼り付けてください
   bind_message: |-
     {{username}} さんとリンクされました！
     友達を招待するには `/steam invite` と入力してください。

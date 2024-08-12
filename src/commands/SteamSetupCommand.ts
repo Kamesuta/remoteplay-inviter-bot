@@ -6,6 +6,7 @@ import { SubcommandInteraction } from './base/command_base.js';
 import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
 import { forDiscord, i18n } from '../utils/i18n.js';
+import { DAEMON_DOWNLOAD_URL } from '../env.js';
 
 class SteamSetupCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
@@ -35,10 +36,14 @@ class SteamSetupCommand extends SubcommandInteraction {
     const daemon = daemonManager.getDaemonFromId(clientId);
     if (!daemon) {
       await interaction.editReply({
-        content: i18n.__({
-          phrase: 'setup_command.error.daemon_offline',
-          locale: interaction.locale,
-        }),
+        content: i18n.__(
+          {
+            phrase: 'setup_command.error.daemon_offline',
+            locale: interaction.locale,
+          },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          { daemon_download_url: DAEMON_DOWNLOAD_URL },
+        ),
       });
       return;
     }

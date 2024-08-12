@@ -5,7 +5,10 @@ setup_command:
   description: Enter the client ID and link your Discord account with the Remote Play Inviter client.
   description_client_id: Client ID of the Remote Play Inviter client
   error:
-    daemon_offline: The client is currently offline. Please start the client and try again.
+    daemon_offline: |-
+      The client is currently offline.
+      Please download and launch the Steam Remote Play Inviter client from the following link and try again.
+      {{daemon_download_url}}
   setup_message: |-
     Remote Play Inviter client and Discord account have been linked!
     To invite friends, type `/steam invite`.
@@ -14,7 +17,7 @@ invite_command:
   description: Invites to games currently running using Steam Remote Play Together.
   error:
     daemon_not_linked: Please register your client ID first with the `/steam setup` command.
-    daemon_offline: The client is offline.
+    daemon_offline: The client is offline. Please launch the Steam Remote Play Inviter client and try again.
     game_info_failed: Failed to retrieve game information.
 
 invite_panel:
@@ -60,7 +63,9 @@ daemon:
   welcome_message: |-
     Welcome, {{username}}!
     Type `/steam invite` to invite a friend.
-  link_message: Type `/steam setup {{client_id}}` to link your Discord account.
+  link_message: |-
+    Type `/steam setup client_id:{{client_id}}` to link your Discord account.
+    I've copied it to your clipboard, so you can paste it into your Discord chat.
   bind_message: |-
     You are now linked to {{username}}!
     Type `/steam invite` to invite a friend.
