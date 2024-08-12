@@ -50,6 +50,14 @@ export class DaemonManager {
   }
 
   /**
+   * Get the number of daemons
+   * @returns number of daemons
+   */
+  getDaemonCount(): number {
+    return Object.keys(this._daemons).length;
+  }
+
+  /**
    * Bind a user to a daemon
    * @param user user
    * @param daemonId daemon ID
@@ -101,5 +109,13 @@ export class DaemonManager {
       },
     });
     return userData?.daemonId ?? undefined;
+  }
+
+  /**
+   * Get the number of users
+   * @returns number of users
+   */
+  async getUserCount(): Promise<number> {
+    return await prisma.userData.count();
   }
 }

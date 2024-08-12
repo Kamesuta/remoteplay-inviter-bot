@@ -9,6 +9,8 @@ import { DaemonServer } from './daemon/DaemonServer.js';
 import { DaemonManager } from './daemon/DaemonManager.js';
 import { DISCORD_TOKEN, PORT } from './env.js';
 import { PrismaClient } from '@prisma/client';
+import { logStatistics } from './utils/statistics.js';
+import { scheduleJob } from 'node-schedule';
 
 // -----------------------------------------------------------------------------------------------------------
 // Setup
@@ -54,6 +56,11 @@ client.on(
     await commandHandler.registerCommands();
 
     logger.info(`Interaction registration completed`);
+
+    // Log statistics
+    await logStatistics();
+    // Every hour
+    scheduleJob('0 * * * *', nowait(logStatistics));
   }),
 );
 client.on(
