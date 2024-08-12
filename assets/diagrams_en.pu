@@ -1,0 +1,95 @@
+@startuml SteamInvite
+
+'Theme
+
+!theme sunlust from https://raw.githubusercontent.com/plantuml/plantuml/master/themes
+
+
+'Definitions
+actor User
+participant Daemon
+box Server
+  participant BOT
+  database DB
+end box
+
+
+'Process
+
+group Start Daemon
+
+User -> Daemon: Launch exe
+activate Daemon
+
+Daemon -> Daemon: Load or generate UUID and save
+
+Daemon -> BOT: WebSocket connection (send UUID)
+activate BOT #Orange
+note right: WebSocket connection
+
+BOT -> BOT: Associate UUID with Socket
+BOT --> Daemon: WebSocket initialization complete
+Daemon -> User: Launch complete notification
+note right: Display "/steam setup UUID" message
+
+end
+
+
+group Link Daemon and User on Discord
+
+User -> BOT: Execute "/steam setup UUID" command
+activate BOT
+
+BOT -> DB: Associate Discord User ID with UUID
+DB --> BOT
+BOT --> User: "Setup complete"
+deactivate BOT
+
+end
+
+
+group Create Invitation Panel on Discord
+
+User -> BOT: Execute "/steam invite" command
+activate BOT
+BOT -> DB: Get UUID from Discord User ID
+DB --> BOT
+BOT -> BOT: Get Socket information from UUID
+BOT -> Daemon: Request Steam game information
+Daemon --> BOT: Steam game information response
+
+BOT --> User: Display invitation link button\nDisplay Steam game information
+deactivate BOT
+
+end
+
+
+group Get Invitation Link on Discord
+
+User -> BOT: Click invitation link button
+activate BOT
+BOT -> DB: Get UUID from Discord User ID
+DB --> BOT
+BOT -> BOT: Get Socket information from UUID
+BOT -> Daemon: Request invitation link
+Daemon --> BOT: Invitation link response
+
+BOT --> User: Display invitation link
+deactivate BOT
+
+end
+
+
+group Terminate Daemon
+
+User -> Daemon: Terminate exe
+Daemon -> BOT: Disconnect WebSocket
+BOT -> BOT: Unassociate UUID with Socket
+deactivate BOT
+
+Daemon --> User: Termination notification
+deactivate Daemon
+
+end
+
+@enduml

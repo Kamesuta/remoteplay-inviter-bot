@@ -21,23 +21,23 @@ group デーモンを起動
 ユーザー -> デーモン: exeを起動
 activate デーモン
 
-デーモン -> デーモン: UUIDを生成
+デーモン -> デーモン: UUIDを読み込み or 生成して保存
 
-デーモン -> BOT: WebSocket接続\n(UUID, Steamゲーム情報)
+デーモン -> BOT: WebSocket接続 (UUIDを送信)
 activate BOT #Orange
 note right: WebSocket接続
 
-BOT -> BOT: UUID→Socketを紐付け\nSteamゲーム情報を保持
+BOT -> BOT: UUID→Socketを紐付け
 BOT --> デーモン: WebSocket初期化完了
 デーモン -> ユーザー: 起動完了通知
-note right: 「/steam_setup UUID と入力してください」と表示
+note right: 「/steam setup UUID と入力してください」と表示
 
 end
 
 
 group Discord上で デーモンとユーザーを紐付け
 
-ユーザー -> BOT: 「/steam_setup UUID」コマンド実行
+ユーザー -> BOT: 「/steam setup UUID」コマンド実行
 activate BOT
 
 BOT -> DB: DiscordユーザーID→UUIDを紐付け
@@ -50,11 +50,13 @@ end
 
 group Discord上で 招待パネル作成
 
-ユーザー -> BOT:「/steam_invite」コマンド実行
+ユーザー -> BOT:「/steam invite」コマンド実行
 activate BOT
 BOT -> DB: DiscordユーザーID→UUIDを取得
 DB --> BOT
-BOT -> BOT: UUID->Socket情報取得\nSteamゲーム情報を取得
+BOT -> BOT: UUID->Socket情報取得
+BOT -> デーモン: Steamゲーム情報を取得リクエスト
+デーモン --> BOT: Steamゲーム情報を取得レスポンス
 
 BOT --> ユーザー: 招待リンク取得ボタン表示\nSteamゲーム情報を表示
 deactivate BOT
@@ -82,7 +84,7 @@ group デーモンを終了
 
 ユーザー -> デーモン: exeを終了
 デーモン -> BOT: WebSocket切断
-BOT -> BOT: UUID→Socketインスタンスを破棄\nSteamゲーム情報を破棄
+BOT -> BOT: UUID→Socket紐づけ解除
 deactivate BOT
 
 デーモン --> ユーザー: 終了通知
