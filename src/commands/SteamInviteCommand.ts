@@ -12,6 +12,7 @@ import steamCommand from './SteamCommand.js';
 import { daemonManager } from '../index.js';
 import InviteButtonAction from './InviteButtonAction.js';
 import { forDiscord, i18n } from '../utils/i18n.js';
+import { TranslatableError } from '../utils/error.js';
 
 class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
@@ -56,9 +57,12 @@ class SteamInviteCommand extends SubcommandInteraction {
     // Request a panel information
     const gameId = await daemon
       .requestGameId(interaction.user)
-      .catch(async (error: Error) => {
-        await interaction.editReply({
-          content: `${error.message}`,
+      .catch(async (error: TranslatableError) => {
+        // Delete the message first to prevent it from being visible and then send the follow-up message
+        await interaction.deleteReply();
+        await interaction.followUp({
+          ephemeral: true,
+          content: `${error.getMessage?.(interaction.locale) ?? error.message}`,
         });
         return;
       });
@@ -95,7 +99,10 @@ class SteamInviteCommand extends SubcommandInteraction {
       typeof headerImage !== 'string' ||
       typeof storeLink !== 'string'
     ) {
-      await interaction.editReply({
+      // Delete the message first to prevent it from being visible and then send the follow-up message
+      await interaction.deleteReply();
+      await interaction.followUp({
+        ephemeral: true,
         content: i18n.__({
           phrase: 'invite_command.error.game_info_failed',
           locale: interaction.locale,

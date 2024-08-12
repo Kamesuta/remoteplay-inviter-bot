@@ -8,6 +8,7 @@ import {
 import { MessageComponentActionInteraction } from './base/action_base.js';
 import { daemonManager } from '../index.js';
 import { i18n } from '../utils/i18n.js';
+import { TranslatableError } from '../utils/error.js';
 
 class InviteButtonAction extends MessageComponentActionInteraction<ComponentType.Button> {
   /**
@@ -82,9 +83,9 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
     // Request a invite link
     const link = await daemon
       .requestLink(interaction.user, Number(gameId))
-      .catch(async (error: Error) => {
+      .catch(async (error: TranslatableError) => {
         await interaction.editReply({
-          content: `${error.message}`,
+          content: `${error.getMessage?.(interaction.locale) ?? error.message}`,
         });
         return;
       });
