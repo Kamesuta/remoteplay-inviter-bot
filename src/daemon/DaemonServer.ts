@@ -11,6 +11,14 @@ import { prisma } from '../index.js';
 import { DAEMON_DOWNLOAD_URL, DAEMON_REQUIRED_VERSION } from '../env.js';
 
 /**
+ * Error types for the daemon server
+ */
+enum DaemonErrorType {
+  /** Outdated daemon */
+  outdated = 'outdated',
+}
+
+/**
  * Represents a daemon server that handles WebSocket connections and HTTP requests.
  */
 export class DaemonServer {
@@ -85,18 +93,15 @@ export class DaemonServer {
     if (
       !daemonVersion ||
       typeof daemonVersion !== 'string' ||
-      !semver.valid(daemonVersion)
+      !semver.valid(daemonVersion) ||
+      !semver.gte(daemonVersion, DAEMON_REQUIRED_VERSION)
     ) {
-      socket.write('HTTP/1.1 400 Bad Request\r\n\r\nInvalid version');
-      socket.destroy();
-      return;
-    }
-    if (!semver.gte(daemonVersion, DAEMON_REQUIRED_VERSION)) {
       const versionJson = JSON.stringify({
+        error: DaemonErrorType.outdated,
         required: DAEMON_REQUIRED_VERSION,
         download: DAEMON_DOWNLOAD_URL,
       });
-      socket.write(`HTTP/1.1 426 Upgrade Required\r\n\r\n${versionJson}`);
+      socket.write(`HTTP/1.1 400 Bad Request\r\n\r\n${versionJson}`);
       socket.destroy();
       return;
     }
