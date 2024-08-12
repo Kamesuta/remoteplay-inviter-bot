@@ -85,7 +85,7 @@ export class DaemonServer {
     } = parse(request.url, true);
 
     if (!daemonId || typeof daemonId !== 'string') {
-      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.write('HTTP/1.1 401 Unauthorized\n\n');
       socket.destroy();
       return;
     }
@@ -101,7 +101,7 @@ export class DaemonServer {
         required: DAEMON_REQUIRED_VERSION,
         download: DAEMON_DOWNLOAD_URL,
       });
-      socket.write(`HTTP/1.1 400 Bad Request\r\n\r\n${versionJson}`);
+      socket.write(`HTTP/1.1 400 Bad Request\nX-Error: ${versionJson}\n\n`);
       socket.destroy();
       return;
     }
