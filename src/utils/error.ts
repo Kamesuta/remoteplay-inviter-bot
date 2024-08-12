@@ -31,7 +31,7 @@ export class TranslatableError extends Error {
 /**
  * Error for invalid response type
  */
-export class InvalidResponseTypeError extends Error {
+export class InvalidResponseTypeError extends TranslatableError {
   /** Constructor */
   constructor() {
     super('error.invalid_response_type');

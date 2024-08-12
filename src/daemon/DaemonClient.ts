@@ -10,77 +10,44 @@ import {
   TranslatableError,
 } from '../utils/error.js';
 import { i18n } from '../utils/i18n.js';
-
-/**
- * A data structure to represent a request to the daemon
- */
-interface DaemonRequestData {
-  id: UUID;
-  cmd: DaemonRequestType;
-  // message type: undefined, others: object
-  user?: {
-    id: string;
-    name: string;
-  };
-  // message type: string, others: undefined
-  data?: unknown;
-  game?: number;
-  copy?: string;
-}
-
-/**
- * A data structure to represent a response from the daemon
- */
-interface DaemonResponseData {
-  id: UUID;
-  cmd: DaemonRequestType;
-  data: unknown;
-}
-
-/**
- * Request Type
- */
-enum DaemonRequestType {
-  /** Announce message */
-  message = 'message',
-
-  /** Generate a game id */
-  gameId = 'game',
-
-  /** Generate a link request */
-  link = 'link',
-
-  /** Error response */
-  error = 'error',
-}
+import {
+  ClientMessage,
+  ClientMessageGameId,
+  ClientMessageLink,
+  DaemonCmd,
+  RequestMessageType,
+  ServerMessage,
+} from './DaemonModels.js';
 
 /**
  * Daemon Request
  */
 interface DaemonRequest {
-  onResolve(type: DaemonRequestType, data: object): void;
-  onReject(error: Error): void;
+  onResolve(res: ClientMessage): void;
+  onReject(error: TranslatableError): void;
 }
 
 /**
  * Daemon Request for type safety
  */
-class TypedDaemonRequest<T> implements DaemonRequest {
+class TypedDaemonRequest<Message extends ClientMessage>
+  implements DaemonRequest
+{
   constructor(
-    public type: DaemonRequestType,
-    public resolve?: (data: T) => void,
-    public reject?: (error: Error) => void,
+    public cmd: Message['cmd'],
+    public resolve?: (res: Message) => void,
+    public reject?: (error: TranslatableError) => void,
   ) {}
 
-  onResolve(type: DaemonRequestType, data: object): void {
-    if (type === this.type) {
-      this.resolve?.(data as T);
+  onResolve(res: ClientMessage): void {
+    if (res.cmd === this.cmd) {
+      this.resolve?.(res as Message);
     } else {
       this.reject?.(new InvalidResponseTypeError());
     }
   }
 
-  onReject(error: Error): void {
+  onReject(error: TranslatableError): void {
     this.reject?.(error);
   }
 }
@@ -110,9 +77,9 @@ export class DaemonClient {
    */
   processResponse(message: string): void {
     // Parse the message
-    let res: DaemonRequestData;
+    let res: ClientMessage;
     try {
-      res = JSON.parse(message) as DaemonResponseData;
+      res = JSON.parse(message) as ClientMessage;
     } catch (_err) {
       // Reset the connection and reject all requests
       this._closeByError(new InvalidResponseJsonError());
@@ -122,18 +89,24 @@ export class DaemonClient {
     // Validate id
     if (typeof res.id !== 'string') return;
 
-    // Validate if the message is error
-    if (res.cmd === DaemonRequestType.error) {
+    // Validate cmd
+    if (!Object.values(DaemonCmd).includes(res.cmd)) {
       // Process the error
-      this._processErrorData(res.id, res.data);
+      this._processError(res.id, new InvalidResponseTypeError());
+      return;
+    }
+
+    // Validate if the message is error
+    if (res.cmd === DaemonCmd.error) {
+      // Process the error
+      this._processErrorData(res.id, res.code);
       return;
     }
 
     // Validate the message
     if (
-      typeof res.cmd !== 'string' ||
-      res.data === undefined ||
-      res.data === null
+      (res.cmd === DaemonCmd.gameId && res.game === undefined) ||
+      (res.cmd === DaemonCmd.link && res.url === undefined)
     ) {
       // Process the error
       this._processError(res.id, new InvalidResponseMessageError());
@@ -141,28 +114,22 @@ export class DaemonClient {
     }
 
     // Process the response
-    this._processResponse(res.id, res.cmd, res.data);
+    this._processResponse(res);
   }
 
   /**
    * Process a response from the daemon
-   * @param requestId request ID
-   * @param cmd request type
-   * @param data request data
+   * @param res response message
    */
-  private _processResponse(
-    requestId: UUID,
-    cmd: DaemonRequestType,
-    data: object,
-  ): void {
+  private _processResponse(res: ClientMessage): void {
     // Find the request
-    const request = this._requests[requestId];
+    const request = this._requests[res.id];
     if (request) {
       // Consume the request
-      delete this._requests[requestId];
+      delete this._requests[res.id];
 
       // Process the request
-      request.onResolve(cmd, data);
+      request.onResolve(res);
     }
   }
 
@@ -215,10 +182,11 @@ export class DaemonClient {
    * @param gameId request game id
    * @returns link
    */
-  requestLink(user: User, gameId: number): Promise<string> {
-    return this._request<string>(DaemonRequestType.link, user, {
+  async requestLink(user: User, gameId: number): Promise<string> {
+    const res = await this._request<ClientMessageLink>(DaemonCmd.link, user, {
       game: gameId,
     });
+    return res.url;
   }
 
   /**
@@ -226,8 +194,12 @@ export class DaemonClient {
    * @param user request user
    * @returns game id
    */
-  requestGameId(user: User): Promise<number> {
-    return this._request<number>(DaemonRequestType.gameId, user);
+  async requestGameId(user: User): Promise<number> {
+    const res = await this._request<ClientMessageGameId>(
+      DaemonCmd.gameId,
+      user,
+    );
+    return res.game;
   }
 
   /**
@@ -237,30 +209,26 @@ export class DaemonClient {
    * @param data request data
    * @returns response
    */
-  private _request<ResponseType>(
-    cmd: DaemonRequestType,
+  private _request<Message extends ClientMessage>(
+    cmd: RequestMessageType,
     user: User,
-    data: object = {},
-  ): Promise<ResponseType> {
+    data: Partial<ServerMessage> = {},
+  ): Promise<Message> {
     const requestId = randomUUID();
 
     return new Promise((resolve, reject) => {
       // Register the callback
-      const request = new TypedDaemonRequest<ResponseType>(
-        cmd,
-        resolve,
-        reject,
-      );
+      const request = new TypedDaemonRequest<Message>(cmd, resolve, reject);
       this._requests[requestId] = request;
 
       // Send the message
-      const requestData: DaemonRequestData = {
+      const requestData = {
         id: requestId,
-        cmd,
         user: {
           id: user.id,
           name: user.username,
         },
+        cmd,
         ...data,
       };
       this._ws.send(JSON.stringify(requestData), (err) => {
@@ -325,10 +293,10 @@ export class DaemonClient {
   private _sendMessage(message: string, copy?: string): void {
     const requestId = randomUUID();
 
-    const requestData: DaemonRequestData = {
+    const requestData: ServerMessage = {
       id: requestId,
-      cmd: DaemonRequestType.message,
-      data: message,
+      cmd: DaemonCmd.message,
+      text: message,
       copy,
     };
 
