@@ -15,6 +15,7 @@ setup_command:
 
 invite_command:
   description: Steam Remote Play Together を使用して起動中のゲームに招待します。
+  description_game_id: ゲームID (通常は指定する必要はありません)
   error:
     daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
     daemon_offline: クライアントがオフラインです。Steam Remote Play Inviter クライアントを起動してから再度お試しください。
@@ -79,3 +80,4 @@ error:
   daemon_unknown: 招待主のクライアントで不明なエラーが発生しました。
   daemon_invalid_cmd: 招待主のクライアントがサーバーから送信されるリクエストのタイプに対応していません。クライアントが最新バージョンであることを確認してください。
   daemon_invalid_app: Steamのゲームを起動していません。ゲームを起動してから再度お試しください。
+  daemon_game_not_supported: このゲームはRemote Play Togetherに対応していません。
