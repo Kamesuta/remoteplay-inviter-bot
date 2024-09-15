@@ -18,7 +18,16 @@ class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
     .setName('invite')
     .setDescription(i18n.__('invite_command.description'))
-    .setDescriptionLocalizations(forDiscord('invite_command.description'));
+    .setDescriptionLocalizations(forDiscord('invite_command.description'))
+    .addNumberOption((option) =>
+      option
+        .setName('game_id')
+        .setDescription(i18n.__('invite_command.description_game_id'))
+        .setDescriptionLocalizations(
+          forDiscord('invite_command.description_game_id'),
+        )
+        .setRequired(false),
+    );
 
   override async onCommand(
     interaction: ChatInputCommandInteraction,
@@ -54,18 +63,23 @@ class SteamInviteCommand extends SubcommandInteraction {
     // Defer the reply
     await interaction.deferReply({ ephemeral: false });
 
+    // Get the game ID
+    const optionGameId = interaction.options.getNumber('game_id');
+
     // Request a panel information
-    const gameId = await daemon
-      .requestGameId(interaction.user)
-      .catch(async (error: TranslatableError) => {
-        // Delete the message first to prevent it from being visible and then send the follow-up message
-        await interaction.deleteReply();
-        await interaction.followUp({
-          ephemeral: true,
-          content: `${error.getMessage?.(interaction.locale) ?? error.message}`,
-        });
-        return;
-      });
+    const gameId =
+      optionGameId ??
+      (await daemon
+        .requestGameId(interaction.user)
+        .catch(async (error: TranslatableError) => {
+          // Delete the message first to prevent it from being visible and then send the follow-up message
+          await interaction.deleteReply();
+          await interaction.followUp({
+            ephemeral: true,
+            content: `${error.getMessage?.(interaction.locale) ?? error.message}`,
+          });
+          return;
+        }));
     if (!gameId) return;
 
     // Steam Language Key
