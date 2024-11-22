@@ -60,6 +60,7 @@ invite_button:
          If you don't have one, please install a controller emulator following the [x360ce installation guide](https://bit.ly/x360ce-tutorial).
          If x360ce doesn't work, you can try playing on your mobile device.
       4. Press the "Join Game" button on the page to open the Steam Link app.
+  join_button: Click to join the game!
 
 daemon:
   welcome_message: |-

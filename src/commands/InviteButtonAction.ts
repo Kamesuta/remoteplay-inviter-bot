@@ -1,4 +1,5 @@
 import {
+  ActionRowBuilder,
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
@@ -133,6 +134,18 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
       )
       .setColor(3447003); // DarkBlue
 
+    // Create join link button
+    const joinLink = new ButtonBuilder()
+      .setStyle(ButtonStyle.Link)
+      .setLabel(
+        i18n.__({
+          phrase: 'invite_button.join_button',
+          locale: interaction.locale,
+        }),
+      )
+      .setURL(link)
+      .setEmoji('🎮');
+
     // Send the invite
     await interaction.editReply({
       content: i18n.__(
@@ -143,6 +156,9 @@ class InviteButtonAction extends MessageComponentActionInteraction<ComponentType
         { link },
       ),
       embeds: [embed],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(joinLink),
+      ],
     });
   }
 }

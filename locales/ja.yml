@@ -60,6 +60,7 @@ invite_button:
         ない人は [x360ceインストール手順](https://bit.ly/x360ce-tutorial) に沿ってコントローラーエミュレーターをインストールしてください
         x360ceがうまくいかない場合は、スマホでプレイできるので、そっちをお試しください
       4. ページ内の「ゲームに参加」ボタンを押して、Steam Linkアプリを開きます
+  join_button: クリックしてゲームに参加！
 
 daemon:
   welcome_message: |-
