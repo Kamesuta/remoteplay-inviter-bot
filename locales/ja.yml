@@ -35,7 +35,7 @@ invite_panel:
       - Steamアカウントはなくてもプレイできます
 
 invite_button:
-  label: 今すぐゲームに参加する！
+  label: ゲームに参加するための招待リンクを取得する！
   error:
     daemon_not_linked: 招待主がクライアントIDを登録していません。
     daemon_offline: 招待主がオフラインです。

@@ -35,7 +35,7 @@ invite_panel:
       - Play without a Steam account
 
 invite_button:
-  label: Join the game now!
+  label: Get an invitation link to join the game!
   error:
     daemon_not_linked: The host has not registered their client ID.
     daemon_offline: The host is offline.
