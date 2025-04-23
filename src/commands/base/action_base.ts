@@ -1,7 +1,7 @@
 import { InteractionBase } from './interaction_base.js';
 import {
   Interaction,
-  MappedComponentBuilderTypes,
+  MappedComponentTypes,
   MappedInteractionTypes,
   ModalBuilder,
   ModalSubmitInteraction,
@@ -99,9 +99,7 @@ export abstract class MessageComponentActionInteraction<
    * Create a builder
    * @returns Created builder
    */
-  abstract create(
-    ...args: unknown[]
-  ): MappedComponentBuilderTypes[MenuComponentType];
+  abstract create(...args: unknown[]): MappedComponentTypes[MenuComponentType];
 
   /** @inheritdoc */
   protected override createCustomId(data?: Record<string, string>): string {
