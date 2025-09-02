@@ -1,24 +1,108 @@
 # Steam Remoteplay Inviter BOT
 
-このリポジトリは、「Steam Remoteplay Inviter」ツールのバックエンドとして機能するDiscord BOTのソースコードを管理しています。
+このリポジトリは、「[Steam Remoteplay Inviter](https://github.com/Kamesuta/remoteplay-inviter-web)」ツールのバックエンドとして機能するDiscord BOTのソースコードを管理しています。
 
-## BOTの役割
+## 概要
 
-このBOTは、以下の主要な役割を担っています。
+このBOTは、Steamの「Remote Play Together」機能を使ったゲームへの招待を、Discordを通じて自動化するためのものです。ホスト（ゲーム主催者）が手動で招待リンクを発行する手間を省き、参加者はDiscordのボタンをクリックするだけで簡単にゲームに参加できます。
 
-*   **招待パネルの作成と管理**: Discordのスラッシュコマンド (`/steam invite` など) を提供し、ユーザーがゲームの招待パネルを簡単に作成・管理できるようにします。
-*   **ユーザーインタラクションの処理**: 参加者が招待パネルの「参加」ボタンを押した際のアクションを処理します。
-*   **クライアントとの通信**: ホスト（ゲーム主催者）のマシンで動作するクライアントアプリケーションと通信し、Steam Remote Play Togetherの招待リンクの発行をリクエストし、受け取ります。
+## 主な機能
 
-このBOTは、「Steam Remoteplay Inviter」エコシステムの中核をなすコンポーネントです。
+*   **スラッシュコマンド**: Discordの `/steam` コマンド群を提供し、直感的な操作を実現します。
+*   **招待パネル**: ゲームへの参加ボタンが付いた招待パネルをDiscord上に作成します。
+*   **招待リンクの自動発行**: 参加ボタンが押されると、BOTがホストのクライアントと連携し、自動で招待リンクを発行して参加者に通知します。
+*   **多言語対応**: i18nを利用し、日本語と英語に対応しています。
+
+## セットアップ方法
+
+### 前提条件
+
+*   [Node.js](https://nodejs.org/) (v22.x)
+*   データベース (MySQL)
+
+### 1. インストール
+
+リポジトリをクローンし、依存パッケージをインストールします。
+
+```bash
+git clone https://github.com/Kamesuta/remoteplay-inviter-bot.git
+cd remoteplay-inviter-bot
+npm install
+```
+
+### 2. 環境変数の設定
+
+`.env.sample` ファイルをコピーして `.env` ファイルを作成します。
+
+```bash
+cp .env.sample .env
+```
+
+次に、`.env` ファイルをエディタで開き、以下の各項目を設定してください。
+
+| 変数名                      | 説明                                                                                             | 例                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| `DISCORD_TOKEN`             | **(必須)** あなたのDiscordボットのトークン。                                                     | `M...`                                             |
+| `DATABASE_URL`              | **(必須)** Prismaが使用するデータベースの接続URL。                                               | `mysql://user:password@localhost:3306/mydb`   |
+| `PORT`                      | クライアントアプリ（デーモン）からの接続を待ち受けるためのポート番号です。                                  | `8000`                                             |
+| `DAEMON_REQUIRED_VERSION`   | **(必須)** 要求するクライアントアプリの最低バージョン。                                          | `1.0.0`                                            |
+| `DAEMON_DOWNLOAD_URL`       | **(必須)** クライアントアプリのバージョンが古い場合に表示するダウンロードURL。                   | `https://github.com/Kamesuta/remoteplay-inviter/releases/latest` |
+
+
+## 実行方法
+
+### 1. データベースのマイグレーション
+
+以下のコマンドを実行して、データベースのスキーマをセットアップします。
+
+```bash
+npx prisma migrate deploy
+```
+
+### 2. Discordコマンドの登録
+
+BOTが使用するスラッシュコマンドをDiscordに登録します。
+
+```bash
+npm run register
+```
+
+### 3. BOTの起動 (開発環境)
+
+以下のコマンドでBOTを起動します。`tsx`によりTypeScriptコードが直接実行されます。
+
+```bash
+npm start
+```
+
+### 4. 本番環境向けのビルドと起動
+
+まず、TypeScriptをJavaScriptにビルドします。
+
+```bash
+npm run build
+```
+
+ビルドが完了すると、`dist` ディレクトリにファイルが生成されます。以下のコマンドでビルドされたコードを実行します。
+
+```bash
+node dist/index.js
+```
+
+## 開発向け情報
+
+### リンターとフォーマッター
+
+コードの品質を保つため、ESLintとPrettierを使用しています。
+
+*   **リンターの実行**: `npm run lint`
+*   **フォーマッターの実行**: `npm run prettier`
 
 ## 関連リポジトリ
 
-「Steam Remoteplay Inviter」プロジェクトは、複数のリポジトリに分かれています。
-
-*   **[remoteplay-inviter-web](https://github.com/Kamesuta/remoteplay-inviter-web)**: プロジェクトの公式ウェブサイトです。
-*   **[remoteplay-inviter](https://github.com/Kamesuta/remoteplay-inviter)**: ホストのPCで実行されるクライアントアプリケーションです。
-*   **[remoteplay-inviter-bot](https://github.com/Kamesuta/remoteplay-inviter-bot)**: このリポジトリです。
+*   **[remoteplay-inviter-web](https://github.com/Kamesuta/remoteplay-inviter-web)**: プロジェクトの公式ウェブサイト
+*   **[remoteplay-inviter](https://github.com/Kamesuta/remoteplay-inviter)**: ホストのPCで実行されるクライアントアプリケーション
+*   **[remoteplay-inviter-bot](https://github.com/Kamesuta/remoteplay-inviter-bot)**: このリポジトリ
 
 ## シーケンス図
 
