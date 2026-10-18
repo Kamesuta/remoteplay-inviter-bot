@@ -20,6 +20,7 @@ invite_command:
     daemon_not_linked: まずは `/steam setup` コマンドでクライアントIDを登録してください。
     daemon_offline: クライアントがオフラインです。Steam Remote Play Inviter クライアントを起動してから再度お試しください。
     game_info_failed: ゲーム情報が取得できませんでした。
+    game_not_supported: このゲームはRemote Play Togetherに対応していません。
 
 invite_panel:
   steam_language: japanese

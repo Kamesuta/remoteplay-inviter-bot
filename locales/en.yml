@@ -20,6 +20,7 @@ invite_command:
     daemon_not_linked: Please register your client ID first with the `/steam setup` command.
     daemon_offline: The client is offline. Please launch the Steam Remote Play Inviter client and try again.
     game_info_failed: Failed to retrieve game information.
+    game_not_supported: This game does not support Remote Play Together.
 
 invite_panel:
   steam_language: english
