@@ -82,3 +82,4 @@ error:
   daemon_invalid_cmd: The host client does not support the type of request sent from the server. Please make sure the client is up to date.
   daemon_invalid_app: Steam game is not running. Please launch the game and try again.
   daemon_game_not_supported: This game does not support Remote Play Together.
+  daemon_invite_failed: Failed to create an invite link on the host client. Please make sure the game is still running on the host and try again.
