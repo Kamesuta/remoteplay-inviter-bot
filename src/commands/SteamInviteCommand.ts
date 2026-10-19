@@ -14,6 +14,9 @@ import InviteButtonAction from './InviteButtonAction.js';
 import { forDiscord, i18n } from '../utils/i18n.js';
 import { TranslatableError } from '../utils/error.js';
 
+/** Steam store category ID of "Remote Play Together" */
+const CATEGORY_REMOTE_PLAY_TOGETHER = 44;
+
 class SteamInviteCommand extends SubcommandInteraction {
   command = new SlashCommandSubcommandBuilder()
     .setName('invite')
@@ -99,6 +102,7 @@ class SteamInviteCommand extends SubcommandInteraction {
           name: string;
           // eslint-disable-next-line @typescript-eslint/naming-convention
           header_image: string;
+          categories?: { id: number }[];
         };
       };
     };
@@ -119,6 +123,23 @@ class SteamInviteCommand extends SubcommandInteraction {
         ephemeral: true,
         content: i18n.__({
           phrase: 'invite_command.error.game_info_failed',
+          locale: interaction.locale,
+        }),
+      });
+      return;
+    }
+
+    // Check whether the game supports Remote Play Together
+    const supportsRemotePlayTogether = (app.data.categories ?? []).some(
+      (category) => category.id === CATEGORY_REMOTE_PLAY_TOGETHER,
+    );
+    if (!supportsRemotePlayTogether) {
+      // Delete the message first to prevent it from being visible and then send the follow-up message
+      await interaction.deleteReply();
+      await interaction.followUp({
+        ephemeral: true,
+        content: i18n.__({
+          phrase: 'invite_command.error.game_not_supported',
           locale: interaction.locale,
         }),
       });

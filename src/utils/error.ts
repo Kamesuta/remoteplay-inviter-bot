@@ -87,6 +87,7 @@ export enum ClientErrorMessageType {
   invalid_cmd = 'error.daemon_invalid_cmd',
   invalid_app = 'error.daemon_invalid_app',
   unsupported_app = 'error.daemon_game_not_supported',
+  invite_failed = 'error.daemon_invite_failed',
   /* eslint-enable @typescript-eslint/naming-convention */
 }
 
