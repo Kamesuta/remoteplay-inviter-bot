@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **このリポジトリは移転しました。** 今後は [Kamesuta/remoteplay-inviter](https://github.com/Kamesuta/remoteplay-inviter) の [`bot/`](https://github.com/Kamesuta/remoteplay-inviter/tree/master/bot) で開発します。
+> This repository has moved to the [`bot/`](https://github.com/Kamesuta/remoteplay-inviter/tree/master/bot) folder of [Kamesuta/remoteplay-inviter](https://github.com/Kamesuta/remoteplay-inviter).
+
 # Steam Remoteplay Inviter BOT
 
 このリポジトリは、「[Steam Remoteplay Inviter](https://github.com/Kamesuta/remoteplay-inviter-web)」ツールのバックエンドとして機能するDiscord BOTのソースコードを管理しています。
